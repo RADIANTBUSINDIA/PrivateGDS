@@ -1,72 +1,149 @@
 import React, { useState } from 'react';
-import { Container, Card, Form, Button } from 'react-bootstrap';
-import { FaUser, FaLock } from 'react-icons/fa';
+import { Form, Button, Card, Container, Row, Col, Alert } from 'react-bootstrap';
+import logo from '../assets/ChatGPT Image Jul 12, 2025, 04_34_28 PM.png';
+import axios from 'axios';
+import BASE_URL from '../configAPI';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ username: '', password: '' });
+  const [form, setForm] = useState({ username: '', password: '' });
+  const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setMessage(''); 
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    console.log('Logging in with:', formData);
-  
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const { username, password } = form;
+
+  if (!username || !password) {
+    setMessage('Please fill in all mandatory fields.');
+    return;
+  }
+
+  const payload = { username, password };
+
+  try {
+    const response = await axios.post(`${BASE_URL}/userMaster/login`, payload);
+
+    const { token, data } = response.data;
+
+    if (token) {
+      localStorage.setItem("authToken", token);
+      console.log("authToken", token);
+      localStorage.setItem("user", JSON.stringify(data));
+      window.location.href = "/"; 
+    }
+  } catch (error) {
+    const errMsg =
+      error.response?.data?.meta?.message || "Login failed. Please try again.";
+    setMessage(errMsg);
+  }
+};
+
 
   return (
     <Container
       fluid
-      className="d-flex align-items-center justify-content-center"
-      style={{ height: '100vh', backgroundColor: '#f4f6f8' }}
+      className="p-0"
+      style={{
+        background: '#ffffff',
+        overflowX: 'hidden',
+      }}
     >
-      <Card className="shadow-lg p-4 rounded-4" style={{ width: '100%', maxWidth: '400px' }}>
-        <h3 className="text-center mb-4 text-primary fw-bold">PRAdmin Login</h3>
-        <Form onSubmit={handleLogin}>
-          <Form.Group className="mb-3">
-            <Form.Label>Username</Form.Label>
-            <div className="input-group">
-              <span className="input-group-text bg-white"><FaUser /></span>
-              <Form.Control
-                type="text"
-                placeholder="Enter username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </Form.Group>
-
-          <Form.Group className="mb-4">
-            <Form.Label>Password</Form.Label>
-            <div className="input-group">
-              <span className="input-group-text bg-white"><FaLock /></span>
-              <Form.Control
-                type="password"
-                placeholder="Enter password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </Form.Group>
-
-          <Button
-            type="submit"
-            className="w-100 rounded-pill"
+      <Row className="g-0" style={{ minHeight: '100vh', overflow: 'hidden' }}>
+        {/* Left Side - Image */}
+        <Col
+          md={6}
+          className="d-none d-md-flex align-items-center justify-content-center p-0"
+          style={{ background: '#ffffff' }}
+        >
+          <img
+            src={logo}
+            alt="Login Visual"
             style={{
-              background: 'linear-gradient(180deg, #1e3c72, #2a5298)',
-              border: 'none',
-              fontWeight: '500'
+              maxWidth: '90%',
+              height: 'auto',
+              objectFit: 'contain',
+              padding: '20px',
+            }}
+          />
+        </Col>
+
+        {/* Right Side - Login Card */}
+        <Col
+          xs={12}
+          md={6}
+          className="d-flex justify-content-center align-items-center p-3"
+          style={{
+            background: '#ffffff',
+          }}
+        >
+          <Card
+            className="shadow rounded-4 w-100"
+            style={{
+              maxWidth: '420px',
+              width: '100%',
+              padding: '30px',
+              background: '#fff',
             }}
           >
-            Login
-          </Button>
-        </Form>
-      </Card>
+            <h4 className="text-center fw-bold mb-4" style={{ color: '#1e1e2d' }}>
+              PRAdmin Login
+            </h4>
+
+            <Form onSubmit={handleSubmit}>
+              <Form.Group className="mb-3" controlId="username">
+                <Form.Label style={{ color: '#1e1e2d' }}>Username</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="username"
+                  value={form.username}
+                  onChange={handleChange}
+                  placeholder="Enter username"
+                  className="rounded-pill"
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="password">
+                <Form.Label style={{ color: '#1e1e2d' }}>Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Enter password"
+                  className="rounded-pill"
+                />
+              </Form.Group>
+
+              {/* Error message */}
+              {message && (
+                <Alert variant="danger" className="py-1 text-center">
+                  {message}
+                </Alert>
+              )}
+
+              <div className="d-grid mt-3">
+                <Button
+                  type="submit"
+                  className="rounded-pill"
+                  style={{
+                    background: '#1e1e2d',
+                    border: 'none',
+                    fontSize: '1rem',
+                    padding: '10px',
+                  }}
+                >
+                  Login
+                </Button>
+              </div>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
     </Container>
   );
 };

@@ -1,31 +1,38 @@
-import React from 'react';
-import {
-  Navbar,
-  Container,
-  Form,
-  Nav,
-  NavDropdown,
-  Offcanvas,
-  Button,
-} from 'react-bootstrap';
+import React from "react";
+import { Navbar, Container, Nav, Offcanvas } from "react-bootstrap";
+import { FaShieldAlt } from "react-icons/fa";
+
+import { IoLogOut } from "react-icons/io5";
+import { GiPlagueDoctorProfile } from "react-icons/gi";
 
 function Topbar() {
-  const expand = 'lg';
+  const expand = "lg";
 
   return (
     <Navbar
       expand={expand}
       style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '16px',
-        padding: '0.75rem 1.5rem',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+        backgroundColor: "#ffffff",
+        borderRadius: "16px",
+        padding: "0.75rem 1.5rem",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
       }}
       className="mb-4"
     >
       <Container fluid>
-        <Navbar.Brand className="fw-bold fs-4 text-primary">PRAdmin</Navbar.Brand>
+        <Navbar.Brand
+          className="fw-bold fs-4 d-flex align-items-center gap-2"
+          style={{ color: "#1e1e2d" }}
+        >
+          <FaShieldAlt size={24} />
+          <span>
+            Welcome to <span style={{ color: "#1e1e2d" }}>PR</span>
+            <span style={{ color: "#1e1e2d" }}>Admin</span>
+          </span>
+        </Navbar.Brand>
+
         <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-${expand}`} />
+
         <Navbar.Offcanvas
           id={`offcanvasNavbar-expand-${expand}`}
           aria-labelledby={`offcanvasNavbarLabel-expand-${expand}`}
@@ -36,36 +43,26 @@ function Topbar() {
               PRAdmin Menu
             </Offcanvas.Title>
           </Offcanvas.Header>
+
           <Offcanvas.Body>
             <Nav className="ms-auto align-items-center gap-3">
-              <Nav.Link href="/login" className="text-dark fw-medium">Login/Register</Nav.Link>
-              <Nav.Link href="/profile" className="text-dark fw-medium">Profile</Nav.Link>
-              <NavDropdown title="More" id="nav-dropdown" className="fw-medium">
-                <NavDropdown.Item href="#action3">Action</NavDropdown.Item>
-                <NavDropdown.Item href="#action4">Another Action</NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item href="#action5">Something Else</NavDropdown.Item>
-              </NavDropdown>
-            </Nav>
-
-            <Form className="d-flex ms-4" style={{ maxWidth: '300px', width: '100%' }}>
-              <Form.Control
-                type="search"
-                placeholder="Search"
-                className="me-2 rounded-pill shadow-sm"
-                aria-label="Search"
-              />
-              <Button
-                variant="primary"
-                className="rounded-pill px-3"
-                style={{
-                  background: 'linear-gradient(180deg, #1e3c72, #2a5298)',
-                  border: 'none',
+              <Nav.Link href="/profile" className="text-dark fw-medium">
+                <GiPlagueDoctorProfile size={20} className="me-2" />
+                Profile
+              </Nav.Link>
+              <Nav.Link
+                onClick={() => {
+                  localStorage.removeItem("authToken");
+                  localStorage.removeItem("user");
+                  window.location.href = "/login";
                 }}
+                className="text-dark fw-medium"
+                style={{ cursor: "pointer" }}
               >
-                Search
-              </Button>
-            </Form>
+                <IoLogOut size={20} className="me-1" />
+                Logout
+              </Nav.Link>
+            </Nav>
           </Offcanvas.Body>
         </Navbar.Offcanvas>
       </Container>

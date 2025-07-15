@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState } from "react";
+import {
+  MdDashboard,
+  MdOutlineAssessment,
+  MdManageAccounts,
+} from "react-icons/md";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { FaShieldAlt } from "react-icons/fa";
+import { MdPlace } from "react-icons/md";
+import { FaCube } from "react-icons/fa";
 
 const Sidebar = () => {
   const [openMasters, setOpenMasters] = useState(false);
@@ -8,62 +16,83 @@ const Sidebar = () => {
     <div
       className="d-flex flex-column vh-100 p-3"
       style={{
-        width: '280px',
-        background: 'linear-gradient(180deg, #1e3c72, #2a5298)',
-        boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
-        borderTopRightRadius: '12px',
-        borderBottomRightRadius: '12px',
-        position: 'sticky',
+        width: "280px",
+        background: " #1e1e2d", 
+        boxShadow: "2px 0 10px rgba(0,0,0,0.1)",
+        borderTopRightRadius: "12px",
+        borderBottomRightRadius: "12px",
+        position: "sticky",
         top: 0,
       }}
     >
-      <h4 className="text-white fw-bold mb-4 text-center border-bottom pb-3">
+      <h4 className="text-white fw-bold mb-4 text-center border-bottom pb-3 d-flex align-items-center justify-content-center gap-2">
+        <FaShieldAlt size={20} />
         PR Admin
       </h4>
 
       <ul className="nav flex-column gap-2">
         <li className="nav-item">
-          <a href="/" className="nav-link text-white px-3 py-2 rounded hover-effect">
-            🏠 Dashboard
+          <a
+            href="/"
+            className="nav-link text-white px-3 py-2 rounded hover-effect"
+          >
+            <MdDashboard style={{ marginRight: "8px" }} />
+            Dashboard
           </a>
         </li>
 
         <li className="nav-item">
-          <a href="/form" className="nav-link text-white px-3 py-2 rounded hover-effect">
-            ✅ Tasks
+          <a
+            href="/form"
+            className="nav-link text-white px-3 py-2 rounded hover-effect"
+          >
+            <MdOutlineAssessment style={{ marginRight: "8px" }} />
+            Reports
           </a>
         </li>
 
-        
         <li className="nav-item">
           <div
             className="nav-link text-white px-3 py-2 rounded hover-effect d-flex justify-content-between align-items-center"
             onClick={() => setOpenMasters(!openMasters)}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: "pointer" }}
           >
-            🧩 Masters
-            <span>{openMasters ? '▾' : '▸'}</span>
+            <span className="d-flex align-items-center">
+              <MdManageAccounts style={{ marginRight: "8px" }} />
+              Masters
+            </span>
+            <span>{openMasters ? "▾" : "▸"}</span>
           </div>
 
           {openMasters && (
-            <ul className="nav flex-column ps-3">
+            <ul className="nav flex-column ps-3 mt-1">
               <li className="nav-item">
-                <a href="/lookUp" className="nav-link text-white px-3 py-1 rounded hover-effect">
-                  🔹 Lookup Master
+                <a
+                  href="/lookUp"
+                  className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
+                >
+                  <FaCube size={18} />
+                  Lookup Master
                 </a>
               </li>
               <li className="nav-item">
-                <a href="/placeMaster" className="nav-link text-white px-3 py-1 rounded hover-effect">
-                  🔹 Place Master
+                <a
+                  href="/placeMaster"
+                  className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
+                >
+                  <MdPlace size={18} />
+                  Place Master
                 </a>
               </li>
-             
             </ul>
           )}
         </li>
 
         <li className="nav-item">
-          <a href="/settings" className="nav-link text-white px-3 py-2 rounded hover-effect">
+          <a
+            href="/settings"
+            className="nav-link text-white px-3 py-2 rounded hover-effect"
+          >
             ⚙️ Settings
           </a>
         </li>

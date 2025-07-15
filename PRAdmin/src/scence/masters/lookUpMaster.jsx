@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-
 import axios from "axios";
 import BASE_URL from "../../configAPI";
 
@@ -10,8 +9,9 @@ const LookupMaster = () => {
     value: "",
     critical: "N",
     createdBy: 1,
+    lookupId: null,
   });
-const moduleInputRef = useRef(null);
+  const moduleInputRef = useRef(null);
 
   const [filters, setFilters] = useState({
     lookupId: 0,
@@ -21,30 +21,35 @@ const moduleInputRef = useRef(null);
 
   const [lookupList, setLookupList] = useState([]);
   const [message, setMessage] = useState("");
-  const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
     fetchLookups();
   }, [filters]);
 
+  const getAuthHeaders = () => ({
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+    },
+  });
+
   const fetchLookups = async () => {
     try {
-      const res = await axios.post(`${BASE_URL}/lookup/view`, {
-        lookupId: 0, 
-        moduleName: "",
-        lookupType: "",
-      });
+      const res = await axios.post(
+        `${BASE_URL}/lookup/view`,
+        {
+          lookupId: 0,
+          moduleName: "",
+          lookupType: "",
+        },
+        getAuthHeaders()
+      );
 
-     
       const allData = res.data.data || [];
 
-      
       const filtered = allData.filter((item) => {
         const matchModule =
           filters.moduleName === "" ||
-          item.MODULENAME.toLowerCase().includes(
-            filters.moduleName.toLowerCase()
-          );
+          item.MODULENAME.toLowerCase().includes(filters.moduleName.toLowerCase());
 
         const matchType =
           filters.type === "" ||
@@ -60,56 +65,40 @@ const moduleInputRef = useRef(null);
     }
   };
 
-const handleEdit = (item) => {
-  setForm({
-    lookupId: item.LOOKUPID,
-    moduleName: item.MODULENAME,
-    type: item.LOOKUPTYPE,
-    value: item.LOOKUPVALUE,
-    critical: item.CRITICAL,
-    createdBy: 1,
-  });
+  const handleEdit = (item) => {
+    setForm({
+      lookupId: item.LOOKUPID,
+      moduleName: item.MODULENAME,
+      type: item.LOOKUPTYPE,
+      value: item.LOOKUPVALUE,
+      critical: item.CRITICAL,
+      createdBy: 1,
+    });
 
-  setMessage(`Editing Module Name: ${item.MODULENAME}`);
-
-  
-  setTimeout(() => {
-    moduleInputRef.current?.focus();
-  }, 0);
-};
-
-
-const handleToggleStatus = async (lookupId, currentStatus) => {
-  const newStatus = currentStatus === "A" ? "I" : "A";
-
-  const confirmMsg = `Are you sure you want to change status to ${
-    newStatus === "A" ? "Active" : "Inactive"
-  }?`;
-  if (!window.confirm(confirmMsg)) return;
-
-  const payload = {
-    status: newStatus,
-    modifiedBy: 1, 
+    setMessage(`Editing Module Name: ${item.MODULENAME}`);
+    setTimeout(() => {
+      moduleInputRef.current?.focus();
+    }, 0);
   };
 
-  console.log("Payload to send:", payload);
+  const handleToggleStatus = async (lookupId, currentStatus) => {
+    const newStatus = currentStatus === "A" ? "I" : "A";
+    if (!window.confirm(`Change status to ${newStatus === "A" ? "Active" : "Inactive"}?`)) return;
 
-  try {
-    const res = await axios.put(`${BASE_URL}/lookup/inactive/${lookupId}`, payload);
-    const msg = res?.data?.meta?.message || "Status updated";
-    setMessage(msg);
-
-    if (res.data.meta.success) {
-      fetchLookups(); // Refresh updated data
+    try {
+      const res = await axios.put(
+        `${BASE_URL}/lookup/inactive/${lookupId}`,
+        { status: newStatus, modifiedBy: 1 },
+        getAuthHeaders()
+      );
+      setMessage(res?.data?.meta?.message || "Status updated");
+      if (res.data.meta.success) fetchLookups();
+    } catch (err) {
+      console.error("Toggle Error:", err);
+      const msg = err?.response?.data?.meta?.message || "Failed to toggle status.";
+      setMessage(msg);
     }
-  } catch (err) {
-    console.error("Toggle Error:", err);
-    setMessage("Failed to toggle status.");
-  }
-};
-
-
-
+  };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -133,7 +122,7 @@ const handleToggleStatus = async (lookupId, currentStatus) => {
     }
 
     const payload = {
-      lookupId: form.lookupId, 
+      lookupId: form.lookupId,
       moduleName: form.moduleName,
       type: form.type,
       value: form.value,
@@ -141,38 +130,33 @@ const handleToggleStatus = async (lookupId, currentStatus) => {
       createdBy: form.createdBy,
     };
 
-    console.log(payload, "payyyyyyyyyy");
     try {
-      let res;
-      if (form.lookupId) {
-        
-        res = await axios.put(`${BASE_URL}/lookup/update`, payload);
-      } else {
-        
-        res = await axios.post(`${BASE_URL}/lookup/insert`, payload);
-      }
+      const res = form.lookupId
+        ? await axios.put(`${BASE_URL}/lookup/update`, payload, getAuthHeaders())
+        : await axios.post(`${BASE_URL}/lookup/insert`, payload, getAuthHeaders());
 
-      const resultMsg = res?.data?.meta?.message || "Something happened";
+      const resultMsg = res?.data?.meta?.message || "Saved successfully.";
       setMessage(resultMsg);
 
       if (res.data.meta.success) {
         setForm({
-          lookupId: null,
           moduleName: "",
           type: "",
           value: "",
           critical: "N",
           createdBy: 1,
+          lookupId: null,
         });
         fetchLookups();
       }
     } catch (err) {
       console.error("Error:", err);
-      setMessage("Something went wrong while saving.");
+      const errorMsg = err?.response?.data?.meta?.message || "Error saving record.";
+      setMessage(errorMsg);
     }
   };
 
-  return (
+ return (
     <div className="container my-5">
       {/* 🔔 Message */}
       {message && (
@@ -280,7 +264,7 @@ const handleToggleStatus = async (lookupId, currentStatus) => {
   type="submit"
   className="btn px-4"
   style={{
-    backgroundColor: "#2a5298",
+    backgroundColor: "#1e1e2d",
     color: "#fff",
     border: "none",
   }}
@@ -324,60 +308,71 @@ const handleToggleStatus = async (lookupId, currentStatus) => {
       </div>
 
       {/* 📋 Table */}
-      {lookupList.length > 0 && (
-        <div className="card shadow mt-5 border-0 rounded-4">
-          <div className="card-body bg-white p-4">
-            <h5 className="text-center mb-3">Lookup Records</h5>
-            <div className="table-responsive">
-              <table className="table table-bordered text-center align-middle table-hover">
-                <thead className="table-primary">
-                  <tr>
-                    <th>ID</th>
-                    <th>Module</th>
-                    <th>Type</th>
-                    <th>Value</th>
-                    <th>Critical</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lookupList.map((item) => (
-                    <tr key={item.LOOKUPID}>
-                      <td>{item.LOOKUPID}</td>
-                      <td>{item.MODULENAME}</td>
-                      <td>{item.LOOKUPTYPE}</td>
-                      <td>{item.LOOKUPVALUE}</td>
-                      <td>{item.CRITICAL}</td>
-                      <td>{item.STATUS}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-primary me-2"
-                          onClick={() => handleEdit(item)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className={`btn btn-sm ${
-                            item.STATUS === "A" ? "btn-info" : "btn-success"
-                          }`}
-                          onClick={() =>
-                            handleToggleStatus(item.LOOKUPID, item.STATUS)
-                          }
-                        >
-                          {item.STATUS === "A"
-                            ? "Make Inactive"
-                            : "Make Active"}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+    {lookupList.length > 0 && (
+  <div className="card shadow mt-5 border-0 rounded-4" style={{ backgroundColor: '#ffff' }}>
+    <div className="card-body p-4">
+      <h5 className="text-center mb-4 fw-bold" style={{ color: '#1e1e2d' }}>
+        Lookup Records
+      </h5>
+      <div className="table-responsive">
+        <table className="table table-hover align-middle text-center">
+          <thead style={{ backgroundColor: '#1e1e2d', color: '#ffff' }}>
+            <tr>
+              <th>ID</th>
+              <th>Module</th>
+              <th>Type</th>
+              <th>Value</th>
+              <th>Critical</th>
+              <th>Status</th>
+              <th style={{ minWidth: '180px' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lookupList.map((item) => (
+              <tr key={item.LOOKUPID}>
+                <td>{item.LOOKUPID}</td>
+                <td>{item.MODULENAME}</td>
+                <td>{item.LOOKUPTYPE}</td>
+                <td>{item.LOOKUPVALUE}</td>
+                <td>{item.CRITICAL === 'Y' ? 'Yes' : 'No'}</td>
+                <td>{item.STATUS === 'A' ? 'Active' : 'Inactive'}</td>
+                <td>
+                  <div className="d-flex justify-content-center gap-2">
+                    <button
+                      className="btn btn-sm rounded-pill px-3"
+                      style={{
+                        backgroundColor: '#1e1e2d',
+                        color: '#fff',
+                        border: 'none',
+                      }}
+                      onClick={() => handleEdit(item)}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      className="btn btn-sm rounded-pill px-3"
+                      style={{
+                        backgroundColor: item.STATUS === 'A' ? '#6c757d' : '#2a5298',
+                        color: '#fff',
+                        border: 'none',
+                      }}
+                      onClick={() =>
+                        handleToggleStatus(item.LOOKUPID, item.STATUS)
+                      }
+                    >
+                      {item.STATUS === 'A' ? 'Deactivate' : 'Activate'}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
