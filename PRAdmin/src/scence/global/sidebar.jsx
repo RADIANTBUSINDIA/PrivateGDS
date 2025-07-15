@@ -84,6 +84,15 @@ const Sidebar = () => {
                   Place Master
                 </a>
               </li>
+              <li className="nav-item">
+                <a
+                  href="/userMaster"
+                  className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
+                >
+                  <MdPlace size={18} />
+                  User Master
+                </a>
+              </li>
             </ul>
           )}
         </li>
