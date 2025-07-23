@@ -72,7 +72,7 @@ const handleSubmit = async (e) => {
           />
         </Col>
 
-        {/* Right Side - Login Card */}
+       
         <Col
           xs={12}
           md={6}

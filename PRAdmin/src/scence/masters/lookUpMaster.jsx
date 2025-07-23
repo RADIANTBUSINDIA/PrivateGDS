@@ -49,7 +49,9 @@ const LookupMaster = () => {
       const filtered = allData.filter((item) => {
         const matchModule =
           filters.moduleName === "" ||
-          item.MODULENAME.toLowerCase().includes(filters.moduleName.toLowerCase());
+          item.MODULENAME.toLowerCase().includes(
+            filters.moduleName.toLowerCase()
+          );
 
         const matchType =
           filters.type === "" ||
@@ -83,7 +85,12 @@ const LookupMaster = () => {
 
   const handleToggleStatus = async (lookupId, currentStatus) => {
     const newStatus = currentStatus === "A" ? "I" : "A";
-    if (!window.confirm(`Change status to ${newStatus === "A" ? "Active" : "Inactive"}?`)) return;
+    if (
+      !window.confirm(
+        `Change status to ${newStatus === "A" ? "Active" : "Inactive"}?`
+      )
+    )
+      return;
 
     try {
       const res = await axios.put(
@@ -95,7 +102,8 @@ const LookupMaster = () => {
       if (res.data.meta.success) fetchLookups();
     } catch (err) {
       console.error("Toggle Error:", err);
-      const msg = err?.response?.data?.meta?.message || "Failed to toggle status.";
+      const msg =
+        err?.response?.data?.meta?.message || "Failed to toggle status.";
       setMessage(msg);
     }
   };
@@ -132,8 +140,16 @@ const LookupMaster = () => {
 
     try {
       const res = form.lookupId
-        ? await axios.put(`${BASE_URL}/lookup/update`, payload, getAuthHeaders())
-        : await axios.post(`${BASE_URL}/lookup/insert`, payload, getAuthHeaders());
+        ? await axios.put(
+            `${BASE_URL}/lookup/update`,
+            payload,
+            getAuthHeaders()
+          )
+        : await axios.post(
+            `${BASE_URL}/lookup/insert`,
+            payload,
+            getAuthHeaders()
+          );
 
       const resultMsg = res?.data?.meta?.message || "Saved successfully.";
       setMessage(resultMsg);
@@ -151,12 +167,13 @@ const LookupMaster = () => {
       }
     } catch (err) {
       console.error("Error:", err);
-      const errorMsg = err?.response?.data?.meta?.message || "Error saving record.";
+      const errorMsg =
+        err?.response?.data?.meta?.message || "Error saving record.";
       setMessage(errorMsg);
     }
   };
 
- return (
+  return (
     <div className="container my-5">
       {/* 🔔 Message */}
       {message && (
@@ -260,22 +277,22 @@ const LookupMaster = () => {
               </div>
             </div>
             <div className="col-12 text-end">
-        <button
-  type="submit"
-  className="btn px-4"
-  style={{
-    backgroundColor: "#1e1e2d",
-    color: "#fff",
-    border: "none",
-  }}
->
-  {form.lookupId ? "Update" : "Submit"}
-</button>
+              <button
+                type="submit"
+                className="btn px-4"
+                style={{
+                  backgroundColor: "#1e1e2d",
+                  color: "#fff",
+                  border: "none",
+                }}
+              >
+                {form.lookupId ? "Update" : "Submit"}
+              </button>
             </div>
           </form>
         </div>
       </div>
-      {/* 🔍 Filter Section */}
+      
       <div className="card shadow border-0 rounded-4 mb-4">
         <div className="card-body bg-light p-4">
           <h5 className="mb-3">Filter Records</h5>
@@ -308,71 +325,77 @@ const LookupMaster = () => {
       </div>
 
       {/* 📋 Table */}
-    {lookupList.length > 0 && (
-  <div className="card shadow mt-5 border-0 rounded-4" style={{ backgroundColor: '#ffff' }}>
-    <div className="card-body p-4">
-      <h5 className="text-center mb-4 fw-bold" style={{ color: '#1e1e2d' }}>
-        Lookup Records
-      </h5>
-      <div className="table-responsive">
-        <table className="table table-hover align-middle text-center">
-          <thead style={{ backgroundColor: '#1e1e2d', color: '#ffff' }}>
-            <tr>
-              <th>ID</th>
-              <th>Module</th>
-              <th>Type</th>
-              <th>Value</th>
-              <th>Critical</th>
-              <th>Status</th>
-              <th style={{ minWidth: '180px' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lookupList.map((item) => (
-              <tr key={item.LOOKUPID}>
-                <td>{item.LOOKUPID}</td>
-                <td>{item.MODULENAME}</td>
-                <td>{item.LOOKUPTYPE}</td>
-                <td>{item.LOOKUPVALUE}</td>
-                <td>{item.CRITICAL === 'Y' ? 'Yes' : 'No'}</td>
-                <td>{item.STATUS === 'A' ? 'Active' : 'Inactive'}</td>
-                <td>
-                  <div className="d-flex justify-content-center gap-2">
-                    <button
-                      className="btn btn-sm rounded-pill px-3"
-                      style={{
-                        backgroundColor: '#1e1e2d',
-                        color: '#fff',
-                        border: 'none',
-                      }}
-                      onClick={() => handleEdit(item)}
-                    >
-                      ✏️ Edit
-                    </button>
-                    <button
-                      className="btn btn-sm rounded-pill px-3"
-                      style={{
-                        backgroundColor: item.STATUS === 'A' ? '#6c757d' : '#2a5298',
-                        color: '#fff',
-                        border: 'none',
-                      }}
-                      onClick={() =>
-                        handleToggleStatus(item.LOOKUPID, item.STATUS)
-                      }
-                    >
-                      {item.STATUS === 'A' ? 'Deactivate' : 'Activate'}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-)}
-
+      {lookupList.length > 0 && (
+        <div
+          className="card shadow mt-5 border-0 rounded-4"
+          style={{ backgroundColor: "#ffff" }}
+        >
+          <div className="card-body p-4">
+            <h5
+              className="text-center mb-4 fw-bold"
+              style={{ color: "#1e1e2d" }}
+            >
+              Lookup Records
+            </h5>
+            <div className="table-responsive">
+              <table className="table table-hover align-middle text-center">
+                <thead style={{ backgroundColor: "#1e1e2d", color: "#ffff" }}>
+                  <tr>
+                    <th>ID</th>
+                    <th>Module</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Critical</th>
+                    <th>Status</th>
+                    <th style={{ minWidth: "180px" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lookupList.map((item) => (
+                    <tr key={item.LOOKUPID}>
+                      <td>{item.LOOKUPID}</td>
+                      <td>{item.MODULENAME}</td>
+                      <td>{item.LOOKUPTYPE}</td>
+                      <td>{item.LOOKUPVALUE}</td>
+                      <td>{item.CRITICAL === "Y" ? "Yes" : "No"}</td>
+                      <td>{item.STATUS === "A" ? "Active" : "Inactive"}</td>
+                      <td>
+                        <div className="d-flex justify-content-center gap-2">
+                          <button
+                            className="btn btn-sm rounded-pill px-3"
+                            style={{
+                              backgroundColor: "#1e1e2d",
+                              color: "#fff",
+                              border: "none",
+                            }}
+                            onClick={() => handleEdit(item)}
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            className="btn btn-sm rounded-pill px-3"
+                            style={{
+                              backgroundColor:
+                                item.STATUS === "A" ? "#6c757d" : "#2a5298",
+                              color: "#fff",
+                              border: "none",
+                            }}
+                            onClick={() =>
+                              handleToggleStatus(item.LOOKUPID, item.STATUS)
+                            }
+                          >
+                            {item.STATUS === "A" ? "Deactivate" : "Activate"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

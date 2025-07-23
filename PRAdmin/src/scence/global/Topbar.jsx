@@ -1,7 +1,9 @@
 import React from "react";
 import { Navbar, Container, Nav, Offcanvas } from "react-bootstrap";
 import { FaShieldAlt } from "react-icons/fa";
-
+import { NavDropdown } from 'react-bootstrap';
+import { ImProfile } from "react-icons/im";
+import { MdOutlinePassword } from "react-icons/md";
 import { IoLogOut } from "react-icons/io5";
 import { GiPlagueDoctorProfile } from "react-icons/gi";
 
@@ -46,10 +48,24 @@ function Topbar() {
 
           <Offcanvas.Body>
             <Nav className="ms-auto align-items-center gap-3">
-              <Nav.Link href="/profile" className="text-dark fw-medium">
-                <GiPlagueDoctorProfile size={20} className="me-2" />
-                Profile
-              </Nav.Link>
+             <NavDropdown
+  title={
+    <span className="text-dark fw-medium">
+      <GiPlagueDoctorProfile size={20} className="me-2" />
+      Profile
+    </span>
+  }
+  id="nav-dropdown-profile"
+>
+  <NavDropdown.Item href="/profile">
+  <ImProfile size={20} className="me-2" />
+  My Profile
+  </NavDropdown.Item>
+  <NavDropdown.Item href="/change-password">
+  <MdOutlinePassword size={20} className="me-2" />
+  Change Password
+  </NavDropdown.Item>
+</NavDropdown>
               <Nav.Link
                 onClick={() => {
                   localStorage.removeItem("authToken");

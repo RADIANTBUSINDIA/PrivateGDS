@@ -8,6 +8,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { FaShieldAlt } from "react-icons/fa";
 import { MdPlace } from "react-icons/md";
 import { FaCube } from "react-icons/fa";
+import { FaUserAstronaut } from "react-icons/fa";
+import { AiOutlineSchedule } from "react-icons/ai";
+import { RiMenuUnfold3Line } from "react-icons/ri";
+import { RiMenuFold3Line } from "react-icons/ri";
+
 
 const Sidebar = () => {
   const [openMasters, setOpenMasters] = useState(false);
@@ -89,8 +94,57 @@ const Sidebar = () => {
                   href="/userMaster"
                   className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
                 >
-                  <MdPlace size={18} />
+                  <FaUserAstronaut size={18} />
                   User Master
+                </a>
+              </li>
+                   <li className="nav-item">
+                <a
+                  href="/scheduleMaster"
+                  className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
+                >
+                  <AiOutlineSchedule size={18} />
+                  Schedule Master
+                </a>
+              </li>
+               <li className="nav-item">
+                <a
+                  href="/routeMaster"
+                  className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
+                >
+                  <AiOutlineSchedule size={18} />
+                  Route Master
+                </a>
+              </li>
+               <li className="nav-item">
+                <a
+                  href="/pickUp"
+                  className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
+                >
+                 <MdPlace size={18} />
+                  Pickup Master
+                </a>
+              </li>
+
+               <li className="nav-item">
+                <a
+                 href="/alias"
+                  className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
+                >
+                  <MdPlace size={18} />
+                  Alias Master
+                </a>
+              </li>
+
+
+               <li className="nav-item">
+                <a
+                 href="/classMaster"
+                  className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
+                >
+                  <MdPlace size={18} />
+                  Class Master
+
                 </a>
               </li>
             </ul>
@@ -99,10 +153,10 @@ const Sidebar = () => {
 
         <li className="nav-item">
           <a
-            href="/settings"
+            href="/userAccessManage"
             className="nav-link text-white px-3 py-2 rounded hover-effect"
           >
-            ⚙️ Settings
+            ⚙️ User Access Management
           </a>
         </li>
       </ul>

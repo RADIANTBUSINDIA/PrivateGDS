@@ -18,7 +18,7 @@ const UserMaster = () => {
     status: "Active",
     email: "",
     contactPhone: "",
-    fromDate: "",
+    fromDate: new Date().toISOString().substring(0, 10),
     toDate: "",
     password: "",
     confirmPassword: "",
@@ -84,7 +84,7 @@ const UserMaster = () => {
       status: "Active",
       email: "",
       contactPhone: "",
-      fromDate: "",
+      fromDate: new Date().toISOString().substring(0, 10),
       toDate: "",
       password: "",
       confirmPassword: "",
@@ -119,6 +119,8 @@ const UserMaster = () => {
       setMessage("Passwords do not match");
       return;
     }
+
+    
 
     setSubmitting(true);
 
@@ -238,9 +240,23 @@ const UserMaster = () => {
             <div className="col-md-6">
               <input name="name" value={form.name} onChange={handleChange} className="form-control" placeholder="Username *" disabled={!!form.userId} />
             </div>
-            <div className="col-md-6">
-              <input type="text" name="fullName" value={form.fullName} onChange={handleChange} className="form-control" placeholder="Full Name *" />
-            </div>
+           <div className="col-md-6">
+  <input
+    type="text"
+    name="fullName"
+    value={form.fullName}
+    onChange={handleChange}
+    onKeyDown={(e) => {
+      const key = e.key;
+      if (!/^[a-zA-Z\s]$/.test(key) && key.length === 1) {
+        e.preventDefault(); // Prevent typing if it's not a letter or space
+      }
+    }}
+    className="form-control"
+    placeholder="Full Name *"
+  />
+</div>
+
             <div className="col-md-6">
               <select name="role" value={form.role} onChange={handleChange} className="form-select">
                 <option value="">Select Role</option>
@@ -261,17 +277,53 @@ const UserMaster = () => {
               </div>
             </div>
             <div className="col-md-6">
-              <input type="email" name="email" value={form.email} onChange={handleChange} className="form-control" placeholder="Email *" />
-            </div>
+  <input
+    type="email"
+    name="email"
+    value={form.email}
+    onChange={handleChange}
+    onBlur={(e) => {
+      const email = e.target.value.trim();
+
+      if (!email.includes("@") || !email.includes(".")) {
+        alert("Email must contain both '@' and '.'");
+        return;
+      }
+     
+    }}
+    className="form-control"
+    placeholder="Email *"
+  />
+</div>
+
+
             <div className="col-md-6">
               <input type="text" name="contactPhone" value={form.contactPhone} onChange={handleChange} className="form-control" placeholder="Phone (10 digits)" maxLength="10" />
             </div>
             <div className="col-md-6">
-              <input type="date" name="fromDate" value={form.fromDate} onChange={handleChange} className="form-control" />
-            </div>
-            <div className="col-md-6">
-              <input type="date" name="toDate" value={form.toDate} onChange={handleChange} className="form-control" />
-            </div>
+  <label htmlFor="fromDate" className="form-label">Effective From Date</label>
+  <input
+    type="date"
+    id="fromDate"
+    name="fromDate"
+    value={form.fromDate}
+    onChange={handleChange}
+    className="form-control"
+  />
+</div>
+
+<div className="col-md-6">
+  <label htmlFor="toDate" className="form-label">Effective To Date</label>
+  <input
+    type="date"
+    id="toDate"
+    name="toDate"
+    value={form.toDate}
+    onChange={handleChange}
+    className="form-control"
+  />
+</div>
+
             {!form.userId && (
               <>
                 <div className="col-md-6">
