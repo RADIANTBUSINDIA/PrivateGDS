@@ -116,6 +116,15 @@ const Sidebar = () => {
                   Route Master
                 </a>
               </li>
+              <li className="nav-item">
+                <a
+                 href="/zonemaster"
+                  className="nav-link text-white px-3 py-1 rounded hover-effect d-flex align-items-center gap-2"
+                >
+                  <MdPlace size={18} />
+                  Zone Master
+                </a>
+              </li>
                <li className="nav-item">
                 <a
                   href="/pickUp"
