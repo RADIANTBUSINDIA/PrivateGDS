@@ -12,7 +12,7 @@ import PickUpPointMaster from '../scence/masters/PickUpPointMaster';
 import AliasMaster from '../scence/masters/AliasMaster';
 import ClassMaster from '../scence/masters/ClassMaster';
 import PlaceMaster from '../scence/masters/placeMaster';
-
+import ZoneMaster from '../scence/masters/zonemaster';
 const Home = () => {
   return (
     <div className="d-flex">
@@ -31,6 +31,7 @@ const Home = () => {
             <Route path="/alias" element={<AliasMaster />} />
             <Route path="/classMaster" element={<ClassMaster />} />
             <Route path="/placeMaster" element={<PlaceMaster />} />
+            <Route path="/zonemaster" element={<ZoneMaster />} />
           </Routes>
         </div>
       </div>
