@@ -24,6 +24,8 @@ import { LuLayoutPanelLeft } from "react-icons/lu";
 import { LiaTruckPickupSolid } from "react-icons/lia";
 import { SiOpenaccess } from "react-icons/si";
 import { TbReportSearch } from "react-icons/tb";
+import { PiMapPinSimpleAreaBold } from "react-icons/pi";
+
 
 import BASE_URL from "../../configAPI"; // Make sure this is correct
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -114,7 +116,8 @@ const Sidebar = ({ collapsed }) => {
             hasAccess("layoutMaster") ||
             hasAccess("moduleMaster") ||
             hasAccess("userAccessManage") ||
-            hasAccess("serviceMaster")) && (
+            hasAccess("serviceMaster")||
+            hasAccess("zoneMaster")) && (
             <li className="nav-item">
               <div
                 className="nav-link text-white px-3 py-2 rounded hover-effect d-flex justify-content-between align-items-center"
@@ -191,6 +194,14 @@ const Sidebar = ({ collapsed }) => {
                       to="/userMaster"
                       icon={<FaUserAstronaut />}
                       label="User Master"
+                      collapsed={collapsed}
+                    />
+                  )}
+                  {hasAccess("zoneMaster") && (
+                    <SidebarItem
+                      to="/zoneMaster"
+                      icon={<PiMapPinSimpleAreaBold />}
+                      label="Zone Master"
                       collapsed={collapsed}
                     />
                   )}

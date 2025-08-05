@@ -15,6 +15,7 @@ import PickUpPointMaster from '../scence/masters/PickUpPointMaster';
 import AliasMaster from '../scence/masters/AliasMaster';
 import ClassMaster from '../scence/masters/ClassMaster';
 import PlaceMaster from '../scence/masters/placeMaster';
+import ZoneMaster from '../scence/masters/zonemaster';
 import LayoutMaster from '../scence/masters/layoutMaster';
 import ModuleMaster from '../scence/masters/moduleMaster';
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
@@ -112,6 +113,7 @@ const Home = () => {
             <Route path="/aliasMaster" element={<AliasMaster />} />
             <Route path="/classMaster" element={<ClassMaster />} />
             <Route path="/placeMaster" element={<PlaceMaster />} />
+            <Route path="/zoneMaster" element={<ZoneMaster />} />
             <Route path="/layoutMaster" element={<LayoutMaster />} />
             <Route path="/moduleMaster" element={<ModuleMaster />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
