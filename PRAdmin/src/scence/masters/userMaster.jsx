@@ -37,6 +37,17 @@ const UserMaster = () => {
     fetchUsers();
   }, []);
 
+
+  useEffect(() => {
+  if (message) {
+    const timer = setTimeout(() => {
+      setMessage("");
+    }, 3000);
+    return () => clearTimeout(timer); // Cleanup on unmount or message change
+  }
+}, [message]);
+
+
   const fetchRoles = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/lookup/roles`, getAuthHeaders());
@@ -172,6 +183,7 @@ const UserMaster = () => {
   };
 
   const handleEdit = (user) => {
+    setMessage("");
     setForm({
       userId: user.userId,
       name: user.name,
@@ -190,6 +202,7 @@ const UserMaster = () => {
   };
 
   const toggleStatus = async (userId, currentStatus) => {
+    setMessage("");
     const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
     if (!window.confirm(`Change status to ${newStatus}?`)) return;
 

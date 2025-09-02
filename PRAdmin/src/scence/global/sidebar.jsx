@@ -19,15 +19,18 @@ import {
   FaBusAlt,
   FaSitemap,
 } from "react-icons/fa";
+import { FaBusSimple } from "react-icons/fa6";
+import { RiCoupon2Fill } from "react-icons/ri";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { LuLayoutPanelLeft } from "react-icons/lu";
 import { LiaTruckPickupSolid } from "react-icons/lia";
 import { SiOpenaccess } from "react-icons/si";
 import { TbReportSearch } from "react-icons/tb";
 import { PiMapPinSimpleAreaBold } from "react-icons/pi";
-
-
-import BASE_URL from "../../configAPI"; // Make sure this is correct
+import { PiCurrencyInrBold } from "react-icons/pi";
+import { RiLayout4Line } from "react-icons/ri";
+import { FaWifi } from "react-icons/fa";
+import BASE_URL from "../../configAPI"; 
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = ({ collapsed }) => {
@@ -48,6 +51,7 @@ const Sidebar = ({ collapsed }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setAccessList(res.data?.data || []);
+        console.log(res.data.data,"hhhhhhhhhh");
       } catch (err) {
         console.error("Error fetching access list:", err);
       }
@@ -117,6 +121,11 @@ const Sidebar = ({ collapsed }) => {
             hasAccess("moduleMaster") ||
             hasAccess("userAccessManage") ||
             hasAccess("serviceMaster")||
+            hasAccess("couponMaster")||
+            hasAccess("fareMaster")||
+            hasAccess("fleetMaster")||
+            hasAccess("amenityMaster")||
+            hasAccess("layoutMasterDesign")||
             hasAccess("zoneMaster")) && (
             <li className="nav-item">
               <div
@@ -197,6 +206,7 @@ const Sidebar = ({ collapsed }) => {
                       collapsed={collapsed}
                     />
                   )}
+
                   {hasAccess("zoneMaster") && (
                     <SidebarItem
                       to="/zoneMaster"
@@ -223,20 +233,13 @@ const Sidebar = ({ collapsed }) => {
                   )}
                   {hasAccess("classMaster") && (
                     <SidebarItem
-                      to="/classMaster"
+                      to="/classNlayoutMasters"
                       icon={<MdHotelClass />}
                       label="Class Master"
                       collapsed={collapsed}
                     />
                   )}
-                  {hasAccess("layoutMaster") && (
-                    <SidebarItem
-                      to="/layoutMaster"
-                      icon={<LuLayoutPanelLeft />}
-                      label="Layout Master"
-                      collapsed={collapsed}
-                    />
-                  )}
+                
                   {hasAccess("moduleMaster") && (
                     <SidebarItem
                       to="/moduleMaster"
@@ -261,6 +264,38 @@ const Sidebar = ({ collapsed }) => {
                       collapsed={collapsed}
                     />
                   )}
+                    {hasAccess("couponMaster") && (
+                    <SidebarItem
+                      to="/couponMaster"
+                      icon={<RiCoupon2Fill />}
+                      label="Coupon Master"
+                      collapsed={collapsed}
+                    />
+                  )}
+                        {hasAccess("fareMaster") && (
+                    <SidebarItem
+                      to="/fareMaster"
+                      icon={<PiCurrencyInrBold />}
+                      label="Fare Master"
+                      collapsed={collapsed}
+                    />
+                  )}     
+                  {hasAccess("fleetMaster") && (
+                    <SidebarItem
+                      to="/fleetMaster"
+                      icon={<FaBusSimple />}
+                      label="Fleet Master"
+                      collapsed={collapsed}
+                    />
+                  )} 
+                  {hasAccess("amenityMaster") && (
+                    <SidebarItem
+                      to="/amenityMaster"
+                      icon={<FaWifi />}
+                      label="Amenity Master"
+                      collapsed={collapsed}
+                    />
+                  )}                         
                 </ul>
               )}
             </li>

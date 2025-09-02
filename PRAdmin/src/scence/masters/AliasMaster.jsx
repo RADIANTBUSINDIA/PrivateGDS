@@ -111,6 +111,8 @@ const AliasMaster = () => {
       placeLabel: alias.PLACE_NAME,
       aliasName: alias.PLACE_ALIAS_NAME,
     });
+     setMessage(`Editing Alias: ${alias.PLACE_ALIAS_NAME}`);
+    //  setTimeout(() => placeInputRef.current?.focus(), 0);
   };
 
   const toggleAliasStatus = async (aliasId, currentStatus) => {

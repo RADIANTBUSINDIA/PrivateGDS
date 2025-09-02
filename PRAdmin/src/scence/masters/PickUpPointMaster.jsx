@@ -1,16 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import AsyncSelect from "react-select/async";
+import  BASE_URL  from "../../configAPI";
 
 const PickUpPointMaster = () => {
   const [form, setForm] = useState({
     placeId: "",
+    zoneId: "",
+    zoneName: "",
     pickUpPointName: "",
     landMark: "",
     createdBy: 1,
     pickUpPointId: null,
     status: "A",
     placeLabel: "",
+    remarks:"",
+    contactNo:"",
   });
 
   const [states, setStates] = useState([]);
@@ -21,10 +26,26 @@ const PickUpPointMaster = () => {
   const [pickupPoints, setPickupPoints] = useState([]);
   const placeInputRef = useRef(null);
   const placeInputFilterRef = useRef(null);
+  const [zone, setZone] = useState([]);
+
 
   const getAuthHeaders = () => ({
     headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
   });
+
+    useEffect(() => {
+    fetchZone();
+  }, []);
+
+    const fetchZone = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/routeMaster/getZonePlacesDropdown`, getAuthHeaders());
+      console.log("Zone data:", JSON.stringify(res.data));
+      if (res.data.meta.success) setZone(res.data.data || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const loadOptions = async (inputValue) => {
     if (inputValue.length < 3) return [];
@@ -51,11 +72,15 @@ const PickUpPointMaster = () => {
     setForm({
       placeLabel: point.PLACENAME,
       placeId: point.PLACE_ID,
+      zoneId: point.ZONE_ID,
+      zoneName: point.ZONENAME,
       pickUpPointName: point.PICKUP_POINT_NAME,
       landMark: point.LANDMARK,
       pickUpPointId: point.PICKUP_POINT_ID,
       status: point.STATUS,
       createdBy: 1,
+      remarks:point.REMARK,
+      contactNo:point.CONTACT_NO,
     });
     setMessage(`Editing Place: ${point.PLACENAME}`);
     setTimeout(() => placeInputRef.current?.focus(), 0);
@@ -99,6 +124,7 @@ const fetchPickupPoints = async (placeId) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const { placeId, zoneId, zoneName, pickUpPointName, landMark } = form;
 if (!form.placeId || !form.pickUpPointName || !form.landMark) {
   setMessage("Please fill in all mandatory fields.");
   return;
@@ -107,15 +133,19 @@ if (!form.placeId || !form.pickUpPointName || !form.landMark) {
 const payload = {
   pickPointId: form.pickUpPointId || null,
   placeId: form.placeId,
+  zoneId: form.zoneId,
+  zoneName: form.zoneName,
   pickPointName: form.pickUpPointName, // match form state key
   landMark: form.landMark,
   status: form.status,
+  remarks:form.remarks,
+  contactNo:form.contactNo,
 };
 
     try {
       var res;
       if (form.pickUpPointId) {
-
+        console.log("upadte");
         console.log("Updating pickup point with payload:", payload);
 
          res = await axios.put(
@@ -125,7 +155,7 @@ const payload = {
         );
 
       }else {
-
+        console.log("insert");
        res = await axios.post(
         "http://localhost:5000/api/pickup/insert",
         payload,
@@ -138,11 +168,15 @@ const payload = {
       if (success) {
         setForm({
           placeId: "",
+          zoneId: "",
+          zoneName: "",
           pickUpPointName: "",
           landMark: "",
           pickUpPointId: null,
           status: "A",
           placeLabel: "",
+          remarks:"",
+          contactNo:"",
         });
         setPickupPoints([]); // Clear table after submission
       }
@@ -258,6 +292,26 @@ const onFilterChange = async (selectedOption, { name }) => {
                 }
               />
             </div>
+             <div className="col-md-6">
+              <label htmlFor="pickUpPointName" className="form-label">
+                Zone  
+              </label>
+        <select
+                id="zoneId"
+                name="zoneId"
+                value={form.zoneId}
+                onChange={handleChange}
+                className="form-select"
+               
+              >
+                <option value="">-- Select Zone --</option>
+                {zone.map((s) => (
+                  <option key={s.ZONE_ID} value={s.ZONE_ID}>
+                    {s.ZONENAME}
+                  </option>
+                ))}
+              </select>  
+            </div>
             <div className="col-md-6">
               <label htmlFor="pickUpPointName" className="form-label">
                 Pickup Point <span className="text-danger">*</span>
@@ -273,6 +327,7 @@ const onFilterChange = async (selectedOption, { name }) => {
                 required
               />
             </div>
+            
             <div className="col-md-6">
               <label htmlFor="landMark" className="form-label">
                 Land Mark <span className="text-danger">*</span>
@@ -286,6 +341,39 @@ const onFilterChange = async (selectedOption, { name }) => {
                 className="form-control"
                 placeholder="Enter Land Mark"
                 required
+              />
+            </div>
+            <div className="col-md-6">
+              <label htmlFor="contactNo" className="form-label">
+                Agent Phone No
+              </label>
+              <input
+                id="contactNo"
+                type="text"
+                name="contactNo"
+                value={form.contactNo}
+                onChange={handleChange}
+                className="form-control"
+                placeholder="Enter Phone no"
+                maxLength={10} 
+  onInput={(e) => {
+    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10); 
+  }}
+              />
+            </div>
+            <div className="col-md-6">
+              <label htmlFor="remarks" className="form-label">
+                Remarks
+              </label>
+              <input
+                id="remarks"
+                type="text"
+                name="remarks"
+                value={form.remarks}
+                onChange={handleChange}
+                className="form-control"
+                placeholder="Enter Land Mark"
+                
               />
             </div>
             <div className="col-md-6">
@@ -384,8 +472,11 @@ const onFilterChange = async (selectedOption, { name }) => {
                   >
                     <tr>
                       <th>Place</th>
-                      <th>Pickup Point</th>
+                      <th>Zone</th>
+                      <th>Pick-up Point</th>
                       <th>Landmark</th>
+                      <th>Remarks</th>
+                      <th>Phone No</th>
                       <th>Status</th>
                       <th>Action</th>
                     </tr>
@@ -395,8 +486,11 @@ const onFilterChange = async (selectedOption, { name }) => {
     pickupPoints.map((point, index) => (
       <tr key={index}>
         <td>{point.PLACENAME}</td>
+        <td>{point.ZONE_NAME}</td>
         <td>{point.PICKUP_POINT_NAME}</td>
         <td>{point.LANDMARK}</td>
+        <td>{point.CONTACT_NO}</td>
+        <td>{point.REMARK}</td>
         <td>{point.STATUS=== "A" ? "Active" : "Inactive"}</td>
          <td>
                         <div className="d-flex justify-content-center gap-2">

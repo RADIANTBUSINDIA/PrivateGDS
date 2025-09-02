@@ -101,6 +101,7 @@ const handleToggleStatus = async (placeId, currentStatus) => {
   const onFormChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   const onFilterChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { placeCode, placeName, stateId } = form;
@@ -154,7 +155,7 @@ const handleToggleStatus = async (placeId, currentStatus) => {
               <label htmlFor="stateId" className="form-label">
                 State <span className="text-danger">*</span>
               </label>
-              <select
+            <select
                 id="stateId"
                 name="stateId"
                 value={form.stateId}
@@ -168,7 +169,7 @@ const handleToggleStatus = async (placeId, currentStatus) => {
                     {s.stateName}
                   </option>
                 ))}
-              </select>
+              </select>  
             </div>
             <div className="col-md-4">
               <label htmlFor="placeCode" className="form-label">
@@ -257,7 +258,6 @@ const handleToggleStatus = async (placeId, currentStatus) => {
                 >
                   <tr>
                     <th>State</th>
-                    <th>Place ID</th>
                     <th>Place Code</th>
                     <th>Name</th>
                     <th>Status</th>
@@ -268,7 +268,6 @@ const handleToggleStatus = async (placeId, currentStatus) => {
                   {places.map((p) => (
                     <tr key={p.PLACE_ID}>
                       <td>{p.STATE_NAME}</td>
-                      <td>{p.PLACE_ID}</td>
                       <td>{p.PLACECODE}</td>
                       <td>{p.PLACENAME}</td>
                       <td>{p.STATUS === "A" ? "Active" : "Inactive"}</td>

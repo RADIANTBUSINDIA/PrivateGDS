@@ -21,6 +21,13 @@ import ModuleMaster from '../scence/masters/moduleMaster';
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 import Dashboard from '../scence/dashboard/dashboard';
 import ServiceMaster from '../scence/masters/serviceMaster';
+import LayoutMasterDesign from '../scence/masters/LayoutMasterDesign';
+import CouponMaster from '../scence/masters/CouponMaster';
+import FareMaster from '../scence/masters/FareMaster';
+import MasterContainer from '../scence/masters/MasterContainer';
+import FleetMaster from '../scence/masters/fleetMaster';
+import AmenityMaster from '../scence/masters/amenityMaster';
+
 
 const Home = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -119,6 +126,13 @@ const Home = () => {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/serviceMaster" element={<ServiceMaster />} />
+            <Route path="/layoutMasterDesign" element={<LayoutMasterDesign />} />
+            <Route path="/couponMaster" element={<CouponMaster />} />
+            <Route path="/fareMaster" element={<FareMaster />} />
+            <Route path="/classNlayoutMasters" element={<MasterContainer />} />
+            <Route path="/fleetMaster" element={<FleetMaster />} />
+            <Route path="/amenityMaster" element={<AmenityMaster />} />
+           
             
           </Routes>
         </div>

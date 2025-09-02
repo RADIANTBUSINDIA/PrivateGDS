@@ -100,6 +100,10 @@ const handleEditStage = (index) => {
     effToDate:stageToEdit.effToDate ?? "",
   });
 
+  if (stageToEdit.placeId) {
+    fetchZones(stageToEdit.placeId);
+  }
+
   setEditIndex(index);
 };
 
@@ -129,7 +133,7 @@ useEffect(() => {
   if (message) {
     const timer = setTimeout(() => {
       setMessage("");
-    }, 4000);
+    }, 3500);
 
     return () => clearTimeout(timer);
   }
@@ -149,9 +153,9 @@ const [updatingId, setUpdatingId] = useState(null);
 
 const toggleZoneStatus = async (routePlaceId, currentStatus) => {
   const newStatus = currentStatus === "A" ? "I" : "A";
-  if (!window.confirm(`Change status to ${newStatus === "A" ? "Active" : "Inactive"}?`)) return;
+  if (!window.confirm(`Press OK you want to ${newStatus === "A" ? "make it Live" : " Delete"}?`)) return;
 
-  setUpdatingId(routePlaceId); // show spinner/loading for this item
+  setUpdatingId(routePlaceId); 
   try {
     const res = await axios.put(
       `${BASE_URL}/routeMaster/deleteRoutePlaces`,
@@ -162,11 +166,12 @@ const toggleZoneStatus = async (routePlaceId, currentStatus) => {
       },
       getAuthHeaders()
     );
-    setMessage(res?.data?.data?.[0]?.RESULT || "Status toggled successfully");
+    
 
     if (res?.data?.meta?.success) {
       await fetchZones(); // re-fetch updated data
        fetchStages(form.routeCode);
+        setMessage(res?.data?.meta?.message);
     }
   } catch (err) {
     console.error("Toggle error:", err);
@@ -175,6 +180,36 @@ const toggleZoneStatus = async (routePlaceId, currentStatus) => {
     setUpdatingId(null); // clear loading state
   }
 };
+
+const toggleRouteStatus = async (routeId, currentStatus) => {
+  const newStatus = currentStatus === "A" ? "I" : "A";
+  if (!window.confirm(`Are you sure you want to ${newStatus === "A" ? "Activate" : "Deactivate"} this route?`)) return;
+
+  setUpdatingId(routeId);
+  try {
+    const res = await axios.put(
+      `${BASE_URL}/routeMaster/deleteRoutes`,
+      {
+        routeId,
+        status: newStatus,
+      },
+      getAuthHeaders()
+    );
+
+    if (res?.data?.meta?.success) {
+      await handleFindRoutes(); // re-fetch matched routes after toggle
+      setMessage(res.data.meta.message);
+    } else {
+      setMessage(res.data.meta.message || "Something went wrong");
+    }
+  } catch (err) {
+    console.error("❌ Toggle Route Error:", err);
+    setMessage("❌ Failed to update route status");
+  } finally {
+    setUpdatingId(null);
+  }
+};
+
 
 
   const fetchPlaces = async () => {
@@ -187,7 +222,7 @@ const toggleZoneStatus = async (routePlaceId, currentStatus) => {
     }
   };
 
-  const fetchZones = async (placeId) => {
+const fetchZones = async (placeId) => {
   if (!placeId) {
     setZones([]);
     return;
@@ -195,7 +230,7 @@ const toggleZoneStatus = async (routePlaceId, currentStatus) => {
 
   try {
     const res = await axios.get(
-      `${BASE_URL}/zoneMaster/getZonePlacesDropdown`,
+      `${BASE_URL}/routeMaster/getZonePlacesDropdown?placeId=${placeId}`,
       getAuthHeaders()
     );
     setZones(res?.data?.data || []);
@@ -204,6 +239,7 @@ const toggleZoneStatus = async (routePlaceId, currentStatus) => {
     setMessage("❌ Failed to fetch zones.");
   }
 };
+
 
 const fetchStages = async (routeCode) => {
 
@@ -232,10 +268,6 @@ const fetchStages = async (routeCode) => {
   status: stage.STATUS,
 }));
 
-
-
-
-
   setStages(formattedStages);
 
       setStages(formattedStages);
@@ -258,19 +290,32 @@ const fetchStages = async (routeCode) => {
   };
 
 
-  const handleStageChange = async (e) => {
+const handleStageChange = async (e) => {
   const { name, value } = e.target;
+
+  let processedValue = value;
+
+  // Restrict letters
+  if (name === "stageNo") {
+    processedValue = value.replace(/[^0-9]/g, ''); // Only digits
+  } else if (name === "km") {
+    processedValue = value.replace(/[^0-9.]/g, ''); // Digits + decimal
+    const parts = processedValue.split('.');
+    if (parts.length > 2) {
+      processedValue = parts[0] + '.' + parts.slice(1).join('');
+    }
+  }
 
   setStageForm((prev) => ({
     ...prev,
-    [name]: value,
+    [name]: processedValue,
     ...(name === "placeId" && { zoneId: "" }),
   }));
 
   if (name === "placeId") {
     try {
       const res = await axios.get(
-        `${BASE_URL}/zoneMaster/getZonePlacesDropdown?placeId=${value}`,
+        `${BASE_URL}/routeMaster/getZonePlacesDropdown?placeId=${processedValue}`,
         getAuthHeaders()
       );
       const zoneList = res?.data?.data;
@@ -281,6 +326,7 @@ const fetchStages = async (routeCode) => {
     }
   }
 };
+
 
 
   const handleGetDetails = async () => {
@@ -444,7 +490,7 @@ if (missingFields.length > 0) {
 
   const getPlaceName = (id) => {
     const place = places.find((p) => p.ID === parseInt(id));
-    return place?.NAME?.trim() || "Unknown";
+    return place?.NAME?.trim() || "NULL";
   };
 
   const getFromToPairs = () => {
@@ -528,56 +574,63 @@ const placeOptions = places.map((p) => ({
     </div>
 
     <div className="col-md-6">
-      <label className="form-label">Via *</label>
-      <select
-        name="viaPlace"
-        value={form.viaPlace}
-        onChange={handleRouteChange}
-        className="form-select"
-        required
-      >
-        <option value="">-- Select Via Place --</option>
-        {places.map((p) => (
-          <option key={p.ID} value={p.ID}>{p.NAME.trim()}</option>
-        ))}
-      </select>
-    </div>
+  <label className="form-label fw-semibold text-black small">Via <span className="text-danger">*</span></label>
+  <Select
+    name="viaPlace"
+    options={placeOptions}
+    value={placeOptions.find((opt) => opt.value === parseInt(form.viaPlace)) || null}
+    onChange={(selectedOption) =>
+      setForm((prev) => ({
+        ...prev,
+        viaPlace: selectedOption?.value || ""
+      }))
+    }
+    placeholder="Type or select via place"
+    isClearable
+    classNamePrefix="react-select"
+  />
+</div>
+
   </div>
 
   {/* Second Row */}
-  <div className="row g-3 mt-2">
-    <div className="col-md-6">
-      <label className="form-label">Start Place *</label>
-      <select
-        name="startPlace"
-        value={form.startPlace}
-        onChange={handleRouteChange}
-        className="form-select"
-        required
-      >
-        <option value="">-- Select Start Place --</option>
-        {places.map((p) => (
-          <option key={p.ID} value={p.ID}>{p.NAME.trim()}</option>
-        ))}
-      </select>
-    </div>
-
-    <div className="col-md-6">
-      <label className="form-label">End Place *</label>
-      <select
-        name="endPlace"
-        value={form.endPlace}
-        onChange={handleRouteChange}
-        className="form-select"
-        required
-      >
-        <option value="">-- Select End Place --</option>
-        {places.map((p) => (
-          <option key={p.ID} value={p.ID}>{p.NAME.trim()}</option>
-        ))}
-      </select>
-    </div>
+<div className="row g-3 mt-2">
+  <div className="col-md-6">
+    <label className="form-label fw-semibold text-black small">Start Place <span className="text-danger">*</span></label>
+    <Select
+      name="startPlace"
+      options={placeOptions}
+      value={placeOptions.find((opt) => opt.value === parseInt(form.startPlace)) || null}
+      onChange={(selectedOption) =>
+        setForm((prev) => ({
+          ...prev,
+          startPlace: selectedOption?.value || ""
+        }))
+      }
+      placeholder="Type or select start place"
+      isClearable
+      classNamePrefix="react-select"
+    />
   </div>
+
+  <div className="col-md-6">
+    <label className="form-label fw-semibold text-black small">End Place <span className="text-danger">*</span></label>
+    <Select
+      name="endPlace"
+      options={placeOptions}
+      value={placeOptions.find((opt) => opt.value === parseInt(form.endPlace)) || null}
+      onChange={(selectedOption) =>
+        setForm((prev) => ({
+          ...prev,
+          endPlace: selectedOption?.value || ""
+        }))
+      }
+      placeholder="Type or select end place"
+      isClearable
+      classNamePrefix="react-select"
+    />
+  </div>
+</div>
 
   {/* Submit Button */}
   <div className="text-end mt-4">
@@ -594,43 +647,42 @@ const placeOptions = places.map((p) => ({
     <div className="card p-4 shadow border-0 rounded-4 my-4">
       <h5 className="text-center text-black fw-bold mb-3">Search Routes by From & To</h5>
       <div className="row g-3 align-items-end">
-        <div className="col-md-5">
-          <label className="form-label">From Place *</label>
-          <select
-            name="selectStartPlace"
-            className="form-select"
-            value={getRouteForm.selectStartPlace}
-         onChange={(e) =>
-    setGetRouteForm((prev) => ({ ...prev, selectStartPlace: e.target.value }))
-  }
-          >
-            <option value="">-- Select From --</option>
-            {places.map((p) => (
-              <option key={p.ID} value={p.ID}>
-                {p.NAME.trim()}
-              </option>
-            ))}
-          </select>
-        </div>
+       <div className="col-md-5">
+  <label className="form-label fw-semibold text-black small">From Place <span className="text-danger">*</span></label>
+  <Select
+    name="selectStartPlace"
+    options={placeOptions}
+    value={placeOptions.find((opt) => opt.value === parseInt(getRouteForm.selectStartPlace)) || null}
+    onChange={(selectedOption) =>
+      setGetRouteForm((prev) => ({
+        ...prev,
+        selectStartPlace: selectedOption?.value || ""
+      }))
+    }
+    placeholder="Type or select From place"
+    isClearable
+    classNamePrefix="react-select"
+  />
+</div>
 
-        <div className="col-md-5">
-          <label className="form-label">To Place *</label>
-          <select
-            name="selectEndPlace"
-            className="form-select"
-            value={getRouteForm.selectEndPlace}
-            onChange={(e) =>
-    setGetRouteForm((prev) => ({ ...prev, selectEndPlace: e.target.value }))
-  }
-          >
-            <option value="">-- Select To --</option>
-            {places.map((p) => (
-              <option key={p.ID} value={p.ID}>
-                {p.NAME.trim()}
-              </option>
-            ))}
-          </select>
-        </div>
+<div className="col-md-5">
+  <label className="form-label fw-semibold text-black small">To Place <span className="text-danger">*</span></label>
+  <Select
+    name="selectEndPlace"
+    options={placeOptions}
+    value={placeOptions.find((opt) => opt.value === parseInt(getRouteForm.selectEndPlace)) || null}
+    onChange={(selectedOption) =>
+      setGetRouteForm((prev) => ({
+        ...prev,
+        selectEndPlace: selectedOption?.value || ""
+      }))
+    }
+    placeholder="Type or select To place"
+    isClearable
+    classNamePrefix="react-select"
+  />
+</div>
+
 
         <div className="col-md-2 text-end">
           <button
@@ -645,32 +697,60 @@ const placeOptions = places.map((p) => ({
 
     {/* Matching Routes Table */}
     {matchedRoutes.length > 0 && (
-      <div className="card p-3 shadow-sm border-0 rounded-4 mt-3">
-        <h6 className="fw-bold text-black text-center mb-3">Matching Routes</h6>
-        <div className="table-responsive">
-          <table className="table table-bordered table-hover">
-            <thead className="table-light">
-              <tr>
-                <th>Route Code</th>
-                <th>Start Place</th>
-                <th>End Place</th>
-                <th>Via Place</th>
-              </tr>
-            </thead>
-            <tbody>
-              {matchedRoutes.map((route, index) => (
-                <tr key={index}>
-                  <td>{route.RM_ROUTECODE}</td>
-                  <td>{route.FROMPLACE}</td>
-                  <td>{route.TOPLACE}</td>
-                  <td>{route.VIAPLACE}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    )}
+  <div className="card p-3 shadow-sm border-0 rounded-4 mt-3">
+    <h6 className="fw-bold text-black text-center mb-3">Matching Routes</h6>
+    <div className="table-responsive">
+      <table className="table table-bordered table-hover">
+        <thead className="table-light">
+          <tr>
+            <th>Route Code</th>
+            <th>Start Place</th>
+            <th>End Place</th>
+            <th>Via Place</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {matchedRoutes.map((route, index) => (
+            <tr key={index}>
+              <td>{route.RM_ROUTECODE}</td>
+              <td>{route.FROMPLACE}</td>
+              <td>{route.TOPLACE}</td>
+              <td>{route.VIAPLACE}</td>
+              <td>
+  <span className={`badge ${route.STATUS === "A" ? "bg-dark" : "bg-secondary"}`}>
+    {route.STATUS === "A" ? "Active" : "Inactive"}
+  </span>
+</td>
+
+              <td>
+  <button
+    className="btn btn-sm"
+    style={{
+      backgroundColor: route.STATUS === "A" ? "#6c757d" : "#2a5298", // gray for active, blue for inactive
+      color: "#fff",
+      opacity: updatingId === route.RM_ROUTEID ? 0.6 : 1,
+      pointerEvents: updatingId === route.RM_ROUTEID ? "none" : "auto",
+    }}
+    onClick={() => toggleRouteStatus(route.RM_ROUTEID, route.STATUS)}
+  >
+    {updatingId === route.RM_ROUTEID
+      ? "Updating..."
+      : route.STATUS === "A"
+      ? "Deactivate"
+      : "Activate"}
+  </button>
+</td>
+
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
   </>
 )}
 
@@ -710,7 +790,7 @@ const placeOptions = places.map((p) => ({
     <div className="col-md-3">
       <label className="form-label fw-semibold text-black small">Stage No <span className="text-danger">*</span></label>
       <input
-        type="number"
+        type="text"
         name="stageNo"
         value={stageForm.stageNo}
         onChange={handleStageChange}
@@ -726,9 +806,11 @@ const placeOptions = places.map((p) => ({
         <Select
     options={placeOptions}
     value={placeOptions.find((opt) => opt.value === stageForm.placeId) || null}
+
     onChange={(selectedOption) =>
-      setStageForm((prev) => ({ ...prev, placeId: selectedOption?.value || "" }))
-    }
+  handleStageChange({ target: { name: "placeId", value: selectedOption?.value || "" } })
+}
+
     placeholder="Type or select a place"
     isClearable
     classNamePrefix="react-select"
@@ -758,7 +840,7 @@ const placeOptions = places.map((p) => ({
     <div className="col-md-3">
       <label className="form-label fw-semibold text-black small">Distance (KM) <span className="text-danger">*</span></label>
       <input
-        type="number"
+        type="text"
         name="km"
         value={stageForm.km}
         onChange={handleStageChange}
@@ -792,6 +874,7 @@ const placeOptions = places.map((p) => ({
         value={stageForm.effFromDate}
         onChange={handleStageChange}
         className="form-control form-control-sm border-dark text-black bg-white"
+       // min={new Date().toISOString().split("T")[0]}
       />
     </div>
 
@@ -829,7 +912,7 @@ const placeOptions = places.map((p) => ({
     {/* Submit */}
     <div className="col-12 text-end mt-3">
       <button type="submit" className="btn btn-dark btn-sm px-4 shadow-sm rounded-pill">
-        Add Stage
+        Add / Update Stage
       </button>
     </div>
   </div>
@@ -843,8 +926,8 @@ const placeOptions = places.map((p) => ({
          
           <th>Place Name</th>
           <th>Zone Name</th>
-          <th>KM</th>
           <th>Stage No</th>
+          <th>KM</th>
           <th>Duration</th>
           <th>eff from</th>
           <th>eff To</th>
@@ -856,8 +939,8 @@ const placeOptions = places.map((p) => ({
       
       <td>{stage.placeName || stage.placeId}</td>
       <td>{stage.zoneName || stage.zoneId}</td>
-      <td>{stage.km}</td>
       <td>{stage.stageNo}</td>
+      <td>{stage.km}</td>
       <td>{stage.time || "—"}</td>
       <td>{stage.effFromDate}</td>
        <td>{stage.effToDate}</td>
