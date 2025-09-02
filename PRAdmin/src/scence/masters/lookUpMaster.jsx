@@ -19,6 +19,25 @@ const LookupMaster = () => {
     type: "",
   });
 
+  const handleReset = () => {
+    setForm({
+      moduleName: "",
+      type: "",
+      value: "",
+      critical: "N", // Default value
+      createdBy: 1, // Default user ID
+      lookupId: null,
+    });
+
+    // Optional: clear any messages or dropdown visibility
+    setMessage?.("");
+
+    // Optional: focus first input field
+    setTimeout(() => {
+      moduleInputRef?.current?.focus(); // only if using ref
+    }, 0);
+  };
+
   const [lookupList, setLookupList] = useState([]);
   const [message, setMessage] = useState("");
 
@@ -276,7 +295,19 @@ const LookupMaster = () => {
                 </label>
               </div>
             </div>
-            <div className="col-12 text-end">
+            <div className="col-12 text-end d-flex justify-content-end gap-2">
+              <button
+                type="button"
+                className="btn px-4"
+                style={{
+                  backgroundColor: "#6c757d",
+                  color: "#fff",
+                  border: "none",
+                }}
+                onClick={handleReset}
+              >
+                Reset
+              </button>
               <button
                 type="submit"
                 className="btn px-4"
@@ -292,7 +323,7 @@ const LookupMaster = () => {
           </form>
         </div>
       </div>
-      
+
       <div className="card shadow border-0 rounded-4 mb-4">
         <div className="card-body bg-light p-4">
           <h5 className="mb-3">Filter Records</h5>

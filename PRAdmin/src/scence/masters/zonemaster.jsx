@@ -17,6 +17,21 @@ const ZoneMaster = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ✅ Auto-clear message after 3 seconds
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  // ✅ Clear message immediately on user interaction
+  const clearMessage = () => {
+    if (message) setMessage("");
+  };
+
   const getAuthHeaders = () => ({
     headers: {
       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -32,7 +47,6 @@ const ZoneMaster = () => {
     setLoading(true);
     try {
       const res = await axios.get(`${BASE_URL}/zoneMaster/viewZones`, getAuthHeaders());
-      console.log("fetch",JSON.stringify(res.data));
       const rows = res.data.data || [];
 
       const mappedZones = rows.map((z) => ({
@@ -64,11 +78,12 @@ const ZoneMaster = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    clearMessage(); // ✅ clear on typing/selecting
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
+    clearMessage(); // ✅ clear on submit
 
     if (!form.placeId || !form.zoneCode || !form.zoneName) {
       setMessage("❗ Please fill all required fields");
@@ -81,29 +96,28 @@ const ZoneMaster = () => {
       zoneName: form.zoneName.trim(),
     };
 
-    const dateSend={
-      zoneId:form.zoneId,
-      zonePlaceId:form.placeId,
-      zoneCode:form.zoneCode,
-      zoneName:form.zoneName,
-    }
-    console.log("payload",payload)
-    var res;
+    const dateSend = {
+      zoneId: form.zoneId,
+      zonePlaceId: form.placeId,
+      zoneCode: form.zoneCode,
+      zoneName: form.zoneName,
+    };
+
     try {
-      if(form.zoneId){
-       res = await axios.post(`${BASE_URL}/zoneMaster/zoneMasterUpdate`, dateSend, getAuthHeaders());
-}else if(!form.zoneId){
- res = await axios.post(`${BASE_URL}/zoneMaster/insert`, payload, getAuthHeaders());
-}
+      let res;
+      if (form.zoneId) {
+        res = await axios.post(`${BASE_URL}/zoneMaster/zoneMasterUpdate`, dateSend, getAuthHeaders());
+      } else {
+        res = await axios.post(`${BASE_URL}/zoneMaster/insert`, payload, getAuthHeaders());
+      }
 
-
-
-      const msg = res?.data?.meta?.message || "Saved successfully";
-      setMessage(msg);
+  
 
       if (res?.data?.meta?.success) {
+        
         resetForm();
         fetchZones();
+        setMessage(res?.data?.meta?.message);
       }
     } catch (err) {
       console.error("Submit error:", err);
@@ -121,52 +135,55 @@ const ZoneMaster = () => {
       createdBy: 1,
       modifiedBy: 1,
     });
+    clearMessage(); // ✅ clear on cancel
   };
 
   const handleEdit = (z) => {
-  setForm({
-    zoneId: z.ZONEID,
-    placeId: z.ZM_PLACEID,
-    zoneCode: z.ZM_ZONECODE,
-    zoneName: z.ZM_ZONENAME,
-    status: z.ZM_STATUS === "A" ? "Active" : "Inactive",
-    createdBy: 1,
-    modifiedBy: 1,
-  });
-  window.scrollTo({ top: 0, behavior: "smooth" });
-};
-
+    setForm({
+      zoneId: z.ZONEID,
+      placeId: z.ZM_PLACEID,
+      zoneCode: z.ZM_ZONECODE,
+      zoneName: z.ZM_ZONENAME,
+      status: z.ZM_STATUS === "A" ? "Active" : "Inactive",
+      createdBy: 1,
+      modifiedBy: 1,
+    });
+    clearMessage(); // ✅ clear on edit
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const toggleZoneStatus = async (zoneId, currentStatus) => {
-  const newStatus = currentStatus === "A" ? "I" : "A";
-  const statusLabel = newStatus === "A" ? "Activate" : "Deactivate";
+    clearMessage(); // ✅ clear on status toggle
 
-  if (!window.confirm(`Are you sure you want to ${statusLabel} this zone?`)) return;
+    const newStatus = currentStatus === "A" ? "I" : "A";
+    const statusLabel = newStatus === "A" ? "Activate" : "Deactivate";
 
-  try {
-    const res = await axios.put(
-      `${BASE_URL}/zoneMaster/zoneMasterDelete`,
-      {
-        zoneId: zoneId,
-        status: newStatus,
-        modifiedBy: 1,
-      },
-      getAuthHeaders()
-    );
+    if (!window.confirm(`Are you sure you want to ${statusLabel} this zone?`)) return;
 
-    setMessage(res?.data?.data?.[0]?.RESULT || "Status toggled successfully");
-    if (res?.data?.meta?.success) {
-      fetchZones();
+    try {
+      const res = await axios.put(
+        `${BASE_URL}/zoneMaster/zoneMasterDelete`,
+        {
+          zoneId: zoneId,
+          status: newStatus,
+          modifiedBy: 1,
+        },
+        getAuthHeaders()
+      );
+
+      setMessage(res?.data?.data?.[0]?.RESULT );
+      if (res?.data?.meta?.success) {
+        setMessage(res?.data?.meta?.message);
+        fetchZones();
+      }
+    } catch (err) {
+      console.error("Toggle error:", err);
+      setMessage("❌ Failed to update status");
     }
-  } catch (err) {
-    console.error("Toggle error:", err);
-    setMessage("❌ Failed to update status");
-  }
-};
-
+  };
 
   return (
-    <div className="container my-4">
+    <div className="container my-4" onClick={clearMessage}>
       <div className="card border-0 rounded-4 shadow mb-4">
         <div className="card-body">
           <h4 className="text-center mb-4">🏘️ Zone Master</h4>
@@ -248,10 +265,7 @@ const ZoneMaster = () => {
                     zones.map((z, idx) => (
                       <tr key={idx}>
                         <td>{idx + 1}</td>
-                        <td>
-  {places.find((p) => p.ID === z.ZM_PLACEID)?.NAME || "—"}
-</td>
-
+                        <td>{places.find((p) => p.ID === z.ZM_PLACEID)?.NAME || "—"}</td>
                         <td>{z.ZM_ZONECODE}</td>
                         <td>{z.ZM_ZONENAME}</td>
                         <td>{z.ZM_STATUS === "A" ? "Active" : "Inactive"}</td>
@@ -264,17 +278,15 @@ const ZoneMaster = () => {
                               Edit
                             </button>
                             <button
-  className="btn btn-sm"
-  style={{
-    backgroundColor: z.ZM_STATUS === "A" ? "#6c757d" : "#198754",
-    color: "#fff",
-  }}
-  onClick={() => toggleZoneStatus(z.ZONEID, z.ZM_STATUS)}
->
-  {z.ZM_STATUS === "A" ? "Deactivate" : "Activate"}
-</button>
-
-                            
+                              className="btn btn-sm"
+                              style={{
+                                backgroundColor: z.ZM_STATUS === "A" ? "#6c757d" : "#198754",
+                                color: "#fff",
+                              }}
+                              onClick={() => toggleZoneStatus(z.ZONEID, z.ZM_STATUS)}
+                            >
+                              {z.ZM_STATUS === "A" ? "Deactivate" : "Activate"}
+                            </button>
                           </div>
                         </td>
                       </tr>
