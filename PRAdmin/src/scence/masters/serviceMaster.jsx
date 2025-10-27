@@ -41,6 +41,8 @@ const ServiceMaster = () => {
     introductionDate: "",
     withdrawalDate: "",
     totalJourneyDistance: "",
+    seatFareEnble:"",
+    spId:"",
   });
 
   const [message, setMessage] = useState("");
@@ -52,6 +54,7 @@ const ServiceMaster = () => {
   const [classList, setClassList] = useState([]);
   const [routeList, setRouteList] = useState([]);
   const [placeList, setPlaceList] = useState([]);
+  const [spList, setSpList] = useState([]);
   const [searchPlaceList, setSearchPlaceList] = useState([]);
   const [serviceEnrouteList, setServiceEnrouteList] = useState([]);
   const [searchTripList, setSearchTripList] = useState([]);
@@ -131,6 +134,7 @@ const ServiceMaster = () => {
 
   useEffect(() => {
     routeDropDown();
+    fetchSPList();
 
     classNameDropDown();
     layoutDropDown();
@@ -217,6 +221,17 @@ setForm(prevForm => ({
       console.error("User Fetch Error:", err);
     }
   };
+  const fetchSPList = async () => {
+      try {
+        const res = await axios.get(
+          `${BASE_URL}/dropDown/getSPDropDown`,
+          getAuthHeaders()
+        );
+        setSpList(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetching Class List:", err);
+      }
+    };
   const classNameDropDown = async () => {
     try {
       const res = await axios.get(
@@ -306,6 +321,8 @@ setForm(prevForm => ({
       introductionDate: form.introductionDate,
       withdrawalDate: form.withdrawalDate,
       operatingDays: form.operationdays,
+      seatFareEnble:form.seatFareEnble,
+      spId:form.spId,
     };
     var res;
     try {
@@ -1352,6 +1369,25 @@ const handleTripCodeClick = (tripCode) => {
                   <option value="N">Night</option>
                 </select>
               </div>
+
+               <div className="col-md-4">
+              <label htmlFor="spId" className="form-label">
+                 Service Provider <span className="text-danger">*</span>
+              </label>
+              <select
+                name="spId"
+                value={form.spId}
+                onChange={handleChange}
+                className="form-select"
+              >
+                <option value="">Select Service Provider</option>
+                {spList.map((c) => (
+                  <option key={c.ID} value={c.ID}>
+                    {c.SERVICEPROVIDERNAME}
+                  </option>
+                ))}
+              </select>
+            </div>
               <div className="col-md-4">
                 <label htmlFor="introductionDate" className="form-label">
                   Introduction Date
@@ -1378,6 +1414,42 @@ const handleTripCodeClick = (tripCode) => {
                   className="form-control"
                 />
               </div>
+
+     
+    <div className="col-md-4">
+              <label className="form-label d-block">
+                Seat Fare Enable <span className="text-danger">*</span>
+              </label>
+              <div className="form-check form-check-inline">
+                <input
+                  type="radio"
+                  name="seatFareEnble"
+                  id="active"
+                  value="Y"
+                  checked={form.seatFareEnble === "Y"}
+                  onChange={handleChange}
+                  className="form-check-input"
+                />
+                <label htmlFor="active" className="form-check-label">
+                  Yes
+                </label>
+              </div>
+              <div className="form-check form-check-inline">
+                <input
+                  type="radio"
+                  name="seatFareEnble"
+                  id="inactive"
+                  value="N"
+                  checked={form.seatFareEnble === "N"}
+                  onChange={handleChange}
+                  className="form-check-input"
+                />
+                <label htmlFor="inactive" className="form-check-label">
+                  No
+                </label>
+              </div>
+            </div>
+
               <div className="col-12 text-end d-flex justify-content-end gap-2">
                 <button
                   type="button"
@@ -1390,6 +1462,9 @@ const handleTripCodeClick = (tripCode) => {
                   {form.serviceId ? "Update" : "Submit"}
                 </button>
               </div>
+
+
+
             </form>
           </div>
         </div>

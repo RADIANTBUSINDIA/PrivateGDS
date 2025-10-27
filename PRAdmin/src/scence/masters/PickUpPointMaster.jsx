@@ -33,13 +33,19 @@ const PickUpPointMaster = () => {
     headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
   });
 
-    useEffect(() => {
+ useEffect(() => {
+  if(form.placeId){
     fetchZone();
-  }, []);
+  } else {
+    setZone([]);
+  }
+}, [form.placeId]);
+
 
     const fetchZone = async () => {
+      alert(form.placeId);
     try {
-      const res = await axios.get(`${BASE_URL}/routeMaster/getZonePlacesDropdown`, getAuthHeaders());
+      const res = await axios.post(`${BASE_URL}/routeMaster/getZonePlacesDropdown`,{placeId:form.placeId}, getAuthHeaders());
       console.log("Zone data:", JSON.stringify(res.data));
       if (res.data.meta.success) setZone(res.data.data || []);
     } catch (e) {
@@ -52,7 +58,7 @@ const PickUpPointMaster = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/dropdown/getPlaces",
+         `${BASE_URL}/dropdown/getPlaces`,
         { place: inputValue, stateId: filters.stateId || undefined },
         getAuthHeaders() 
       );
@@ -93,8 +99,8 @@ const fetchPickupPoints = async (placeId) => {
   console.log("Fetching pickup points for placeId:", payload);
 
   try {
-    const res = await axios.post(
-      `http://localhost:5000/api/pickup/view`,payload,
+    const res = await axios.post(`${BASE_URL}/pickup/view`
+      ,payload,
       getAuthHeaders()
     );
 
@@ -149,7 +155,7 @@ const payload = {
         console.log("Updating pickup point with payload:", payload);
 
          res = await axios.put(
-          "http://localhost:5000/api/pickup/update",
+           `${BASE_URL}/pickup/update`,
           payload,
           getAuthHeaders()
         );
@@ -157,7 +163,7 @@ const payload = {
       }else {
         console.log("insert");
        res = await axios.post(
-        "http://localhost:5000/api/pickup/insert",
+         `${BASE_URL}/pickup/insert`,
         payload,
         getAuthHeaders()
       );
@@ -199,7 +205,7 @@ const payload = {
 
   try {
     const res = await axios.put(
-      "http://localhost:5000/api/pickup/toggleStatus",
+       `${BASE_URL}/pickup/toggleStatus`,
       payload,
       {
         headers: {

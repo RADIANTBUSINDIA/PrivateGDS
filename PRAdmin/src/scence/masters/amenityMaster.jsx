@@ -4,7 +4,7 @@ import BASE_URL from "../../configAPI";
 
 const AmenityMaster = () => {
   const API_BASE_URL = BASE_URL; // e.g. http://localhost:5000/api
-  const IMAGE_BASE_URL = "http://localhost:5000"; // for image display
+  const IMAGE_BASE_URL = "http://145.223.18.116:5000"; // for image display
 
   const [form, setForm] = useState({
     amenityId: "",
@@ -51,7 +51,7 @@ const AmenityMaster = () => {
     uploadFile(file);
   };
 
-  // ✅ Upload file immediately after selection
+  // ✅ Upload file immediately after selectio
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append("image", file);

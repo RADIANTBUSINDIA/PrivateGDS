@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import AsyncSelect from "react-select/async";
+import BASE_URL from "../../configAPI";
 
 const AliasMaster = () => {
   const [form, setAliasForm] = useState({
@@ -22,7 +23,7 @@ const AliasMaster = () => {
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/dropdown/getPlaces",
+        `${BASE_URL}/dropdown/getPlaces`,
         { place: inputValue },
         getAuthHeaders()
       );
@@ -46,7 +47,7 @@ const AliasMaster = () => {
     if (placeId) {
       try {
         const res = await axios.post(
-          "http://localhost:5000/api/placeAlias/view",
+          `${BASE_URL}/placeAlias/view`,
           { placeId },
           getAuthHeaders()
         );
@@ -78,8 +79,8 @@ const AliasMaster = () => {
 
     const isUpdate = Boolean(aliasId);
     const url = isUpdate
-      ? "http://localhost:5000/api/placeAlias/update"
-      : "http://localhost:5000/api/placeAlias/insert";
+      ? `${BASE_URL}/placeAlias/update`
+      :`${BASE_URL}/placeAlias/insert`;
     const method = isUpdate ? "put" : "post";
     const payload = isUpdate
       ? { aliasId, aliasName, placeId }
@@ -123,7 +124,7 @@ const AliasMaster = () => {
 
     try {
       const res = await axios.put(
-        "http://localhost:5000/api/placeAlias/toggleStatus",
+        `${BASE_URL}/placeAlias/toggleStatus`,
         { aliasId, status: newStatus },
         getAuthHeaders()
       );

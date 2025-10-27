@@ -27,7 +27,11 @@ import FareMaster from '../scence/masters/FareMaster';
 import MasterContainer from '../scence/masters/MasterContainer';
 import FleetMaster from '../scence/masters/fleetMaster';
 import AmenityMaster from '../scence/masters/amenityMaster';
+import ServiceProvider from '../scence/masters/serviceProvider';
 
+import CourierRateDefineMaster from '../scence/masters/CourierRateDefineMaster';
+import CourierBooking from '../scence/masters/CourierBooking';
+import AssignCouriersToTrips from '../scence/masters/AssignCouriersToTrips';
 
 const Home = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -132,6 +136,10 @@ const Home = () => {
             <Route path="/classNlayoutMasters" element={<MasterContainer />} />
             <Route path="/fleetMaster" element={<FleetMaster />} />
             <Route path="/amenityMaster" element={<AmenityMaster />} />
+            <Route path="/serviceProvider" element={<ServiceProvider />} />
+            <Route path="/courierRateDefineMaster" element={<CourierRateDefineMaster />} />
+            <Route path="/courierBooking" element={<CourierBooking />} />
+            <Route path="/assignCouriersToTrips" element={<AssignCouriersToTrips />} />
            
             
           </Routes>
