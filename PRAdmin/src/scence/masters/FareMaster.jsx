@@ -459,9 +459,9 @@ const handleSave = async () => {
   <tr>
     <th>From</th>
     <th>To</th>
-    <th>EffectiveFrom date</th>
+    {/* <th>EffectiveFrom date</th>
     <th>EffectiveTo date</th>
-    <th>ClassOfService </th>
+    <th>ClassOfService </th> */}
     {fareForm.seatType === "1" && (
       <>
         <th>Seater Fare</th>
@@ -498,9 +498,9 @@ const handleSave = async () => {
     <tr key={idx}>
       <td>{pair.fromPlaceName}</td>
       <td>{pair.toPlaceName}</td>
-      <td>{formatDateDMY(pair.effFromDate)}</td>
+      {/* <td>{formatDateDMY(pair.effFromDate)}</td>
       <td>{formatDateDMY(pair.effToDate)}</td>
-      <td>{pair.className}</td>
+      <td>{pair.className}</td> */}
 
       {(fareForm.seatType === "1" || fareForm.seatType === "3") && (
         <>

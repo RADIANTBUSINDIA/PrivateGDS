@@ -16,11 +16,13 @@ const CouponScreen = () => {
     couponCode: "",
     couponName: "",
     cashBackFlag: "N",
+    spId:"",
   });
 
   const couponCodeInputRef = useRef();         // Applicability (readonly) focus
   const couponCodeRef = useRef(null);          // Master (edit) focus
   const [couponList, setCouponList] = useState([]);
+  const [spList, setSpList] = useState([]);
   const [message, setMessage] = useState("");
 
   // Pagination (Master)
@@ -70,6 +72,7 @@ const CouponScreen = () => {
 
   useEffect(() => {
     fetchRouteCodes();
+    fetchSPList();
   }, []);
 
   useEffect(() => {
@@ -77,6 +80,18 @@ const CouponScreen = () => {
       fetchApplicabilityList();
     }
   }, [activeTab]);
+
+  const fetchSPList = async () => {
+        try {
+          const res = await axios.get(
+            `${BASE_URL}/dropDown/getSPDropDown`,
+            getAuthHeaders()
+          );
+          setSpList(res.data.data || []);
+        } catch (err) {
+          console.error("Error fetching Class List:", err);
+        }
+      };
 
   // ----------------------------
   // Helpers
@@ -455,6 +470,7 @@ const CouponScreen = () => {
       couponCode: form.couponCode,
       couponName: form.couponName,
       cashBackFlag: form.cashBackFlag,
+      spId:form.spId,
     };
 
     const updatePayload = {
@@ -462,6 +478,7 @@ const CouponScreen = () => {
       CouponCode: form.couponCode,
       CouponName: form.couponName,
       CashBackFlag: form.cashBackFlag,
+       spId:form.spId,
     };
 
     try {
@@ -571,6 +588,26 @@ const CouponScreen = () => {
                     placeholder="Enter coupon name"
                   />
                 </div>
+
+                <div className="col-lg-6">
+             <label htmlFor="spId" className="form-label fs-6 text-dark">
+                 Service Provider <span className="text-danger">*</span>
+              </label>
+              <select
+                name="spId"
+                value={form.spId}
+                onChange={handleChange}
+                className="form-select"
+              >
+                <option value="">Select Service Provider</option>
+                <option value="0">All</option>
+                {spList.map((c) => (
+                  <option key={c.ID} value={c.ID}>
+                    {c.SERVICEPROVIDERNAME}
+                  </option>
+                ))}
+              </select>
+            </div>
 
                 <div className="col-lg-6 d-flex align-items-center">
                   <div className="form-check">

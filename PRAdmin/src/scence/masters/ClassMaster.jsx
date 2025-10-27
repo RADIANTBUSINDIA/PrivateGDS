@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import BASE_URL from "../../configAPI";
 
 const ClassMaster = () => {
   const [classes, setClasses] = useState([]);
+  const [spList, setSpList] = useState([]);
   const [form, setForm] = useState({
   classId: null,
   classCode: "",
   className: "",
   category: "",
   status: "A",
+  spId:"",
 });
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +24,20 @@ const ClassMaster = () => {
 
   useEffect(() => {
     fetchClasses();
+    fetchSPList();
   }, []);
+  const fetchSPList = async () => {
+      try {
+        const res = await axios.get(
+          `${BASE_URL}/dropDown/getSPDropDown`,
+          getAuthHeaders()
+        );
+        setSpList(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetching Class List:", err);
+      }
+    };
+  
 
   // const fetchClasses = async () => {
   //   setLoading(true);
@@ -44,7 +60,7 @@ const ClassMaster = () => {
   setMessage(""); // Clear previous messages
   try {
     const res = await axios.get(
-      `http://localhost:5000/api/classMaster/getClassList`,
+       `${BASE_URL}/classMaster/getClassList`,
       getAuthHeaders()
     );
     console.log("Fetched classes:", res.data);
@@ -88,10 +104,12 @@ const handleInsert = async () => {
     classCode: form.classCode.trim(),
     className: form.className.trim(),
     calssCatagory: form.category.trim().toUpperCase(),
+    spId:form.spId,
   };
 
   try {
-    const res = await axios.post(`http://localhost:5000/api/classMaster/insert`, payload, getAuthHeaders());
+    const res = await axios.post(`${BASE_URL}/classMaster/insert`
+      , payload, getAuthHeaders());
     const result = res.data;
     console.log("Insert response:", result);  
     if (result.meta.success) {
@@ -111,13 +129,14 @@ const handleUpdate = async () => {
     className: form?.className?.trim(),
     classCatagory: form?.category?.trim(),
     status: form?.status?.trim(),
+    spId:form.spId,
   };
 
   console.log("📤 Updating payload:", payload);
 
   try {
     const res = await axios.post(
-      "http://localhost:5000/api/classMaster/update",
+       `${BASE_URL}/classMaster/update`,
       payload,
       getAuthHeaders()
     )  
@@ -156,7 +175,7 @@ const toggleClassStatus = async (classId, currentStatus) => {
 
   try {
     const res = await axios.put(
-      `http://localhost:5000/api/classMaster/toggleStatus`,
+       `${BASE_URL}/classMaster/toggleStatus`,
       payload,
       {
         headers: {
@@ -247,6 +266,25 @@ const toggleClassStatus = async (classId, currentStatus) => {
                 value={form.className}
                 onChange={(e) => setForm({ ...form, className: e.target.value })}
               />
+            </div>
+
+            <div className="col-md-6">
+              <label htmlFor="spId" className="form-label">
+                 Service Provider <span className="text-danger">*</span>
+              </label>
+              <select
+                name="spId"
+                value={form.spId}
+                onChange={(e) => setForm({ ...form, spId: e.target.value })}
+                className="form-select"
+              >
+                <option value="">Select Service Provider</option>
+                {spList.map((c) => (
+                  <option key={c.ID} value={c.ID}>
+                    {c.SERVICEPROVIDERNAME}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="col-md-6">

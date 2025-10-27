@@ -18,6 +18,7 @@ import {
   FaPlaceOfWorship,
   FaBusAlt,
   FaSitemap,
+  FaServicestack,
 } from "react-icons/fa";
 import { FaBusSimple } from "react-icons/fa6";
 import { RiCoupon2Fill } from "react-icons/ri";
@@ -31,13 +32,18 @@ import { PiCurrencyInrBold } from "react-icons/pi";
 import { RiLayout4Line } from "react-icons/ri";
 import { FaWifi } from "react-icons/fa";
 import BASE_URL from "../../configAPI"; 
+import { FaTruck } from "react-icons/fa";
+import { FaBoxes } from "react-icons/fa";
+import { FaBus } from "react-icons/fa";
+import { FaShippingFast } from "react-icons/fa";
+import { FaClipboardList } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = ({ collapsed }) => {
   const [openMasters, setOpenMasters] = useState(false);
   const [openPlaceMaster, setOpenPlaceMaster] = useState(false);
   const [accessList, setAccessList] = useState([]);
-
+const [openCourier, setOpenCourier] = useState(false);
   const sidebarWidth = collapsed ? 80 : 250;
 
   // Fetch access data on component mount
@@ -107,6 +113,53 @@ const Sidebar = ({ collapsed }) => {
               collapsed={collapsed}
             />
           )}
+              {(hasAccess("couriers") ||
+                    hasAccess("courierBooking") ||
+                    hasAccess("courierRateDefineMaster") ||
+                    hasAccess("assignCouriersToTrips")) && (
+                    <li className="nav-item">
+                      <div
+                        className="nav-link text-white px-3 py-1 rounded hover-effect d-flex justify-content-between align-items-center"
+                        onClick={() => setOpenCourier(!openCourier)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <span className="d-flex align-items-center gap-2">
+                          <FaBus size={18} />
+                          {!collapsed && "Courier Booking Master"}
+                        </span>
+                        {!collapsed && <span>{openCourier ? "▾" : "▸"}</span>}
+                      </div>
+
+                      {!collapsed && openCourier && (
+                        <ul className="nav flex-column ps-4">
+                          {hasAccess("courierRateDefineMaster") && (
+                            <SidebarItem
+                              to="/courierRateDefineMaster"
+                              icon={<FaBus />}
+                              label="Courier Rate Define Master"
+                              collapsed={collapsed}
+                            />
+                          )}
+                          {hasAccess("courierBooking") && (
+                            <SidebarItem
+                              to="/courierBooking"
+                              icon={<FaShippingFast />}
+                              label="Courier Booking"
+                              collapsed={collapsed}
+                            />
+                          )}
+                          {hasAccess("assignCouriersToTrips") && (
+                            <SidebarItem
+                              to="/assignCouriersToTrips"
+                              icon={<FaTruck />}
+                              label="Courier Assignments"
+                              collapsed={collapsed}
+                            />
+                          )}
+                        </ul>
+                      )}
+                    </li>
+                  )}
 
           {/* Masters */}
           {(hasAccess("lookupMaster") ||
@@ -125,6 +178,7 @@ const Sidebar = ({ collapsed }) => {
             hasAccess("fareMaster")||
             hasAccess("fleetMaster")||
             hasAccess("amenityMaster")||
+            hasAccess("serviceProvider")||
             hasAccess("layoutMasterDesign")||
             hasAccess("zoneMaster")) && (
             <li className="nav-item">
@@ -295,11 +349,22 @@ const Sidebar = ({ collapsed }) => {
                       label="Amenity Master"
                       collapsed={collapsed}
                     />
-                  )}                         
+                  )}     
+                   {hasAccess("serviceProvider") && (
+                    <SidebarItem
+                      to="/serviceProvider"
+                      icon={<FaServicestack />}
+                      label="Service Provider"
+                      collapsed={collapsed}
+                    />
+                  )}                       
                 </ul>
               )}
             </li>
           )}
+
+
+          
 
           {hasAccess("reports") && (
             <SidebarItem

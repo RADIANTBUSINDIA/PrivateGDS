@@ -10,11 +10,13 @@ const RouteStageMaster = () => {
   const preSelected = location.state?.preSelected;
 
   const [activeTab, setActiveTab] = useState("route");
+  const [spList, setSpList] = useState([]);
   const [form, setForm] = useState({
     routeCode: preSelected?.routeCode || "",
     startPlace: preSelected?.startPlace || "",
     endPlace: preSelected?.endPlace || "",
     viaPlace: preSelected?.viaPlace || "",
+    spId:preSelected?.spId ||"",
   });
   const [editIndex, setEditIndex] = useState(null);
 const stageNoRef = useRef(null);
@@ -52,10 +54,21 @@ const getAuthHeaders = () => ({
   useEffect(() => {
     fetchPlaces();
     fetchZones();
+    fetchSPList();
     if (form.routeCode) fetchStages(form.routeCode);
   }, [form.routeCode]);
 
-
+const fetchSPList = async () => {
+      try {
+        const res = await axios.get(
+          `${BASE_URL}/dropDown/getSPDropDown`,
+          getAuthHeaders()
+        );
+        setSpList(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetching Class List:", err);
+      }
+    };
 
   const [matchedRoutes, setMatchedRoutes] = useState([]);
 
@@ -229,11 +242,13 @@ const fetchZones = async (placeId) => {
   }
 
   try {
-    const res = await axios.get(
-      `${BASE_URL}/routeMaster/getZonePlacesDropdown?placeId=${placeId}`,
+    const res = await axios.post(
+      `${BASE_URL}/routeMaster/getZonePlacesDropdown`,{placeId:placeId},
       getAuthHeaders()
     );
     setZones(res?.data?.data || []);
+    console.log("jiii",res?.data?.data);
+    
   } catch (err) {
     console.error(err);
     setMessage("❌ Failed to fetch zones.");
@@ -314,8 +329,8 @@ const handleStageChange = async (e) => {
 
   if (name === "placeId") {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/routeMaster/getZonePlacesDropdown?placeId=${processedValue}`,
+      const res = await axios.post(
+        `${BASE_URL}/routeMaster/getZonePlacesDropdown`,{placeId:processedValue},
         getAuthHeaders()
       );
       const zoneList = res?.data?.data;
@@ -381,6 +396,7 @@ const handleStageChange = async (e) => {
         startPlace: parseInt(form.startPlace),
         endPlace: parseInt(form.endPlace),
         viaPlace: parseInt(form.viaPlace),
+        spId: parseInt(form.spId),
       };
       const res = await axios.post(`${BASE_URL}/routeMaster/insert`, payload, getAuthHeaders());
       const msg = res?.data?.meta?.message || "✅ Route inserted successfully.";
@@ -631,6 +647,25 @@ const placeOptions = places.map((p) => ({
     />
   </div>
 </div>
+
+ <div className="col-md-6">
+              <label htmlFor="spId" className="form-label">
+                 Service Provider <span className="text-danger">*</span>
+              </label>
+              <select
+                name="spId"
+                value={form.spId}
+                onChange={(e) => setForm({ ...form, spId: e.target.value })}
+                className="form-select"
+              >
+                <option value="">Select Service Provider</option>
+                {spList.map((c) => (
+                  <option key={c.ID} value={c.ID}>
+                    {c.SERVICEPROVIDERNAME}
+                  </option>
+                ))}
+              </select>
+            </div>
 
   {/* Submit Button */}
   <div className="text-end mt-4">

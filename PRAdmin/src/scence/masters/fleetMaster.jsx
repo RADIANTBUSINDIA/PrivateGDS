@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import BASE_URL from "../../configAPI";
+import Select from "react-select";
 
 const FleetMaster = () => {
   const [fleets, setFleets] = useState([]);
   const [classList, setclassList] = useState([]);
+  const [spList, setSpList] = useState([]);
+  const [amenitiesList, setAmenitiesList] = useState([]);
   const [layoutList, setLayoutList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [message, setMessage] = useState("");
@@ -31,6 +34,7 @@ const FleetMaster = () => {
     createdBy: 1,
     modifiedBy: 1,
     status: "Active",
+    spId:"",
   });
 
   const getAuthHeaders = () => ({
@@ -43,6 +47,8 @@ const FleetMaster = () => {
     fetchClassList();
     fetchLayoutList();
     fetchFleetList();
+    fetchSPList();
+    fetchAmenitiesList();
   }, []);
 
   const fetchClassList = async () => {
@@ -56,6 +62,33 @@ const FleetMaster = () => {
       console.error("Error fetching Class List:", err);
     }
   };
+
+    const fetchSPList = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/dropDown/getSPDropDown`,
+        getAuthHeaders()
+      );
+      setSpList(res.data.data || []);
+    } catch (err) {
+      console.error("Error fetching Class List:", err);
+    }
+  };
+
+
+    const fetchAmenitiesList = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/dropDown/getAmenitiesDropDown`,
+        getAuthHeaders()
+      );
+      setAmenitiesList(res.data.data || []);
+      console.log(JSON.stringify(res.data.data));
+    } catch (err) {
+      console.error("Error fetching Class List:", err);
+    }
+  };
+
 
   const fetchLayoutList = async () => {
     try {
@@ -104,6 +137,7 @@ const FleetMaster = () => {
           ? String(u.POLLUTION_EXPIRY_DATE).substring(0, 10)
           : "",
         status: u.STATUS === "A" ? "Active" : "Inactive",
+        spName:u.SERVICE_PROVIDER_NAME,
       }));
 
       setFleets(mappedFleet);
@@ -238,7 +272,8 @@ const FleetMaster = () => {
             lastServiceDate: form.lastServiceDate,
             insuranceExpiryDate: form.insuranceExpiryDate,
             pollutionExpiryDate: form.pollutionExpiryDate,
-            modifiedBy: form.modifiedBy, // if you're tracking who updated
+            modifiedBy: form.modifiedBy,
+            spId:form.spId,
           }
         : {
             busName: form.busName,
@@ -256,7 +291,8 @@ const FleetMaster = () => {
             lastServiceDate: form.lastServiceDate,
             insuranceExpiryDate: form.insuranceExpiryDate,
             pollutionExpiryDate: form.pollutionExpiryDate,
-            createdBy: form.createdBy, // optional: who created
+            createdBy: form.createdBy,
+            spId:form.spId, // optional: who created
           };
 
       let res;
@@ -397,6 +433,22 @@ const FleetMaster = () => {
 
             <div className="col-md-6">
               <select
+                name="spId"
+                value={form.spId}
+                onChange={handleChange}
+                className="form-select"
+              >
+                <option value="">Select Service Provider</option>
+                {spList.map((c) => (
+                  <option key={c.ID} value={c.ID}>
+                    {c.SERVICEPROVIDERNAME}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-md-6">
+              <select
                 name="classId"
                 value={form.classId}
                 onChange={handleChange}
@@ -436,16 +488,57 @@ const FleetMaster = () => {
                 maxLength="50"
               />
             </div>
-            <div className="col-md-6">
-              <input
-                type="text"
-                name="amenities"
-                value={form.amenities}
-                onChange={handleChange}
-                className="form-control"
-                placeholder="Amenities"
-              />
-            </div>
+<div className="col-md-6">
+  <Select
+    isMulti
+    id="amenities"
+    name="amenities"
+    options={amenitiesList.map((am) => ({
+      value: am.AM_ID,   // store ID
+      label: am.AM_NAME, // display name
+    }))}
+    closeMenuOnSelect={false}
+    hideSelectedOptions={false}
+    placeholder="Amenities"
+    value={
+      form.amenities
+        ? form.amenities.split(",").map((id) => ({
+            value: parseInt(id, 10),
+            label:
+              amenitiesList.find((am) => am.AM_ID === parseInt(id, 10))?.AM_NAME ||
+              id,
+          }))
+        : []
+    }
+    onChange={(selectedOptions) => {
+      const ids = selectedOptions.map((opt) => opt.value);
+      setForm((prev) => ({
+        ...prev,
+        amenities: ids.join(","), // store as CSV string
+      }));
+    }}
+    styles={{
+      multiValue: (base) => ({
+        ...base,
+        backgroundColor: "#f0f0f0",
+        borderRadius: "4px",
+        padding: "2px",
+      }),
+      multiValueLabel: (base) => ({
+        ...base,
+        color: "#333",
+      }),
+      multiValueRemove: (base, state) => ({
+        ...base,
+        color: "#555",
+        backgroundColor: state.isFocused ? "#ddd" : "transparent",
+        borderRadius: "2px",
+      }),
+    }}
+  />
+</div>
+
+
             <div className="col-md-6">
               <label htmlFor="gpsEnabled" className="form-label">
                 &nbsp;&nbsp;&nbsp;GPS Enable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -622,6 +715,7 @@ const FleetMaster = () => {
                     <th>Bus Name</th>
                     <th>Vehicle Number</th>
                     <th>Model Type</th>
+                    <th>Service Provider</th>
                     <th>Class</th>
                     <th>Layout</th>
                     <th>GPS Enabled</th>
@@ -646,6 +740,7 @@ const FleetMaster = () => {
                         <td>{u.busName}</td>
                         <td>{u.vehicleNumber}</td>
                         <td>{u.modelType}</td>
+                        <td>{u.spName}</td>
                         <td>
                           {" "}
                           {classList?.find((r) => r.CLASSID === u.classId)

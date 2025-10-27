@@ -15,9 +15,11 @@ const LayoutMaster = () => {
     formattedEffectiveToDate: "",
     deckType: "",
     layoutId: null,
+    spId:"",
   });
 
   const [layoutList, setLayoutList] = useState([]);
+  const [spList, setSpList] = useState([]);
   const [message, setMessage] = useState("");
   const layoutCodeInputRef = useRef(null);
 
@@ -48,6 +50,19 @@ const LayoutMaster = () => {
       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
     },
   });
+
+   const fetchSPList = async () => {
+      try {
+        const res = await axios.get(
+          `${BASE_URL}/dropDown/getSPDropDown`,
+          getAuthHeaders()
+        );
+        setSpList(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetching Class List:", err);
+      }
+    };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -138,6 +153,7 @@ const LayoutMaster = () => {
 
   useEffect(() => {
     getAllLayout();
+    fetchSPList();
   }, []);
 
   const handleChange = (e) => {
@@ -179,7 +195,7 @@ const LayoutMaster = () => {
 
     try {
       const res = await axios.post(
-        `http://172.31.98.168:5000/api/layoutMaster/taggleStatus`,
+        `${BASE_URL}/layoutMaster/taggleStatus`,
         { status: newStatus, layoutId: layoutId },
         getAuthHeaders()
       );
@@ -215,36 +231,57 @@ const LayoutMaster = () => {
         <div className="card-body p-4 bg-white">
           <h4 className="text-center mb-4">Layout Master Form</h4>
           <form onSubmit={handleSubmit} className="row g-4">
-            {[
-              ["layoutCode", "Layout Code", "text"],
-              ["layoutDescription", "Layout Description", "text"],
-              ["seatingType", "Seating Type", "text"],
-              ["totalSeaterCount", "Total Seater Count", "number"],
-              ["totalBerthCount", "Total Berth Count", "number"],
-              ["deckType", "Deck Type", "text"],
-              ["conductorSeat", "Conductor Seat", "number"],
-              ["totalSeats", "Total Seats", "number"],
-              ["formattedEffectiveFromDate", "Effective From", "date"],
-              ["formattedEffectiveToDate", "Effective To", "date"],
-            ].map(([name, label, type], i) => (
-              <div className="col-md-4" key={name}>
-                <label htmlFor={name} className="form-label">
-                  {label} <span className="text-danger">*</span>
-                </label>
-                <input
-                  id={name}
-                  name={name}
-                  type={type}
-                  value={form[name] || ""}
-                  onChange={handleChange}
-                  className="form-control"
-                  placeholder={`Enter ${label.toLowerCase()}`}
-                  required
-                  ref={name === "layoutDescription" ? layoutCodeInputRef : null}
-                  disabled={name === "layoutCode" && !!form.layoutId}
-                />
-              </div>
-            ))}
+           {[
+  ["layoutCode", "Layout Code", "text"],
+  ["layoutDescription", "Layout Description", "text"],
+   ["spId", "Service Provider", "select"],
+  ["seatingType", "Seating Type", "text"],
+  ["totalSeaterCount", "Total Seater Count", "number"],
+  ["totalBerthCount", "Total Berth Count", "number"],
+  ["deckType", "Deck Type", "text"],
+  ["conductorSeat", "Conductor Seat", "number"],
+  ["totalSeats", "Total Seats", "number"],
+  ["formattedEffectiveFromDate", "Effective From", "date"],
+  ["formattedEffectiveToDate", "Effective To", "date"],
+].map(([name, label, type]) => (
+  <div className="col-md-4" key={name}>
+    <label htmlFor={name} className="form-label">
+      {label} <span className="text-danger">*</span>
+    </label>
+
+    {type === "select" ? (
+      <select
+        id={name}
+        name={name}
+        value={form[name] || ""}
+        onChange={handleChange}
+        className="form-select"
+        required
+      >
+        <option value="">Select {label}</option>
+        {spList.map((c) => (
+          <option key={c.ID} value={c.ID}>
+            {c.SERVICEPROVIDERNAME}
+          </option>
+        ))}
+      </select>
+    ) : (
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={form[name] || ""}
+        onChange={handleChange}
+        className="form-control"
+        placeholder={`Enter ${label.toLowerCase()}`}
+        required
+        ref={name === "layoutDescription" ? layoutCodeInputRef : null}
+        disabled={name === "layoutCode" && !!form.layoutId}
+      />
+    )}
+  </div>
+))}
+
 
             <div className="col-12 text-end d-flex justify-content-end gap-2">
               <button
